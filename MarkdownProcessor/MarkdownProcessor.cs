@@ -41,16 +41,15 @@ namespace MarkdownProcessor
 
         private static string ProcessAndGetHtml(string filecontent)
         {
-            var result = string.Join(PSeparator,
+            return string.Join(PSeparator,
                 ExtractParagraphs(filecontent)
                     .Select(p => 
                         WrapP(
                         UnescapeMarks(
                         WrapStrong(
                         WrapEm(
-                        WrapCodeAndEscapeMarks(
+                        WrapCodeAndEscapeMarksInCode(
                         EscapeAngleBrackets(p))))))));
-            return result;
         }
 
         private static void WriteHtmlFile(string filename, string result)
@@ -74,23 +73,20 @@ namespace MarkdownProcessor
             return textForEscape.Replace("<", "&lt;").Replace(">", "&gt;");
         }
 
-        public static string WrapCodeAndEscapeMarks(string input)
+        public static string WrapCodeAndEscapeMarksInCode(string input)
         {
             var codeWrapped = WrapCode(input);
-            var marksEscaped = EscapeMarksInCode(codeWrapped);
-
-            return string.Join("", marksEscaped);
+            return EscapeMarksInCode(codeWrapped);
         }
 
-        private static string WrapCode(string input)
+        public static string WrapCode(string input)
         {
-            var codeWrapped = Regex.Replace(input,
+            return Regex.Replace(input,
                 @"(?<![\\`])`(" + @"[^`]+" + @")(?<!\\)`(?!`)",
                 "<code>$1</code>");
-            return codeWrapped;
         }
 
-        private static string[] EscapeMarksInCode(string textToEscape)
+        public static string EscapeMarksInCode(string textToEscape)
         {
             var escapeMarks = false;
             var result = Regex.Split(textToEscape, "(<code>|</code>)")
@@ -100,25 +96,21 @@ namespace MarkdownProcessor
                     escapeMarks = st == "<code>";
                     return resultString;
                 }).ToArray();
-            return result;
+            return string.Join("", result);
         }
 
         public static string WrapEm(string input)
         {
-            var result = Regex.Replace(input,
+            return Regex.Replace(input,
                 @"(?<![\\_\w])_(" + @"(_{2,}|[^_])+" + @")(?<!\\)_(?![_\w])",
                 "<em>$1</em>");
-
-            return result;
         }
 
         public static string WrapStrong(string input)
         {
-            var result = Regex.Replace(input,
+            return Regex.Replace(input,
                 @"(?<![\\_\w])__(?!_)(((?!__).)*)(?<![\\_])__(?![_\w])",
                 "<strong>$1</strong>");
-
-            return result;
         }
 
         public static string UnescapeMarks(string textWithEscapedMarks)
@@ -392,7 +384,7 @@ namespace MarkdownProcessor
         {
             var input = @"Текст окруженный `одинарными _обратными_ кавычками` -> code";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
+            var result = MarkdownProcessor.WrapCodeAndEscapeMarksInCode(input);
 
             Assert.AreEqual(@"Текст окруженный <code>одинарными \_обратными\_ кавычками</code> -> code", result);
         }
@@ -402,7 +394,7 @@ namespace MarkdownProcessor
         {
             var input = @"Экранирование: \`Вот это\`, не должно выделиться тегом code";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
+            var result = MarkdownProcessor.WrapCode(input);
 
             Assert.AreEqual(input, result);
         }
@@ -412,7 +404,7 @@ namespace MarkdownProcessor
         {
             var input = @"Текст окруженный ``двойными _обратными_ кавычками`` ->X code";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
+            var result = MarkdownProcessor.WrapCode(input);
 
             Assert.AreEqual(input, result);
         }
@@ -422,7 +414,7 @@ namespace MarkdownProcessor
         {
             var input = @"Текст с `` двойными _обратными_ кавычками ->X code";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
+            var result = MarkdownProcessor.WrapCode(input);
 
             Assert.AreEqual(input, result);
         }
@@ -432,7 +424,7 @@ namespace MarkdownProcessor
         {
             var input = @"Текст с ``двойной и одинарной обратными кавычками` ->X code";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
+            var result = MarkdownProcessor.WrapCodeAndEscapeMarksInCode(input);
 
             Assert.AreEqual(input, result);
         }
@@ -442,7 +434,7 @@ namespace MarkdownProcessor
         {
             var input = @"Текст с `одинарной и двойной обратными кавычками`` ->X code";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
+            var result = MarkdownProcessor.WrapCodeAndEscapeMarksInCode(input);
 
             Assert.AreEqual(input, result);
         }
@@ -450,11 +442,11 @@ namespace MarkdownProcessor
         [Test]
         public void escape_marks_in_code_before_proceeding_processing()
         {
-            var input ="Метки _внутри_ `одинарных _обратных_ кавычек` __должны__ экранироваться";
+            var input ="Метки _внутри_ <code>тегов _кода_ code</code> __должны__ экранироваться";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
+            var result = MarkdownProcessor.EscapeMarksInCode(input);
 
-            Assert.AreEqual(@"Метки _внутри_ <code>одинарных \_обратных\_ кавычек</code> __должны__ экранироваться", result);
+            Assert.AreEqual(@"Метки _внутри_ <code>тегов \_кода\_ code</code> __должны__ экранироваться", result);
         }
 
         [Test]
