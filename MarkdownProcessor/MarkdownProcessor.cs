@@ -106,7 +106,7 @@ namespace MarkdownProcessor
         public static string WrapEm(string input)
         {
             var result = Regex.Replace(input,
-                @"(?<![\\_])_(" + @"(_{2,}|[^_])+" + @")(?<!\\)_(?!_)",
+                @"(?<![\\_\w])_(" + @"(_{2,}|[^_])+" + @")(?<!\\)_(?![_\w])",
                 "<em>$1</em>");
 
             return result;
@@ -115,7 +115,7 @@ namespace MarkdownProcessor
         public static string WrapStrong(string input)
         {
             var result = Regex.Replace(input,
-                @"(?<![\\_])__(?!_)(((?!__).)*)(?<![\\_])__(?!_)",
+                @"(?<![\\_\w])__(?!_)(((?!__).)*)(?<![\\_])__(?![_\w])",
                 "<strong>$1</strong>");
 
             return result;
@@ -198,6 +198,36 @@ namespace MarkdownProcessor
         }
 
         [Test]
+        public void wrap_text_on_two_lines_between_two_underscores_to_em()
+        {
+            var input = "Текст _окруженный \nсимволами_ подчеркивания в нескольких строках";
+
+            var result = MarkdownProcessor.WrapEm(input);
+
+            Assert.AreEqual("Текст <em>окруженный \nсимволами</em> подчеркивания в нескольких строках", result);
+        }
+
+        [Test]
+        public void wrap_text_between_two_underscores_with_inner_double_underscore_to_em()
+        {
+            var input = "Внутри _выделения em может быть __ двойное подчеркивание_.";
+
+            var result = MarkdownProcessor.WrapEm(input);
+
+            Assert.AreEqual("Внутри <em>выделения em может быть __ двойное подчеркивание</em>.", result);
+        }
+
+        [Test]
+        public void wrap_text_between_two_underscores_with_inner_double_underscores_to_em()
+        {
+            var input = "Внутри _выделения em может быть __strong__ выделение_.";
+
+            var result = MarkdownProcessor.WrapEm(input);
+
+            Assert.AreEqual("Внутри <em>выделения em может быть __strong__ выделение</em>.", result);
+        }
+
+        [Test]
         public void not_wrap_text_between_two_double_underscores_to_em()
         {
             var input = "Текст __окруженный с двух сторон__  двойными символами подчерка";
@@ -238,23 +268,23 @@ namespace MarkdownProcessor
         }
 
         [Test]
-        public void wrap_text_on_two_lines_between_two_underscores_to_em()
-        {
-            var input = "Текст _окруженный \nсимволами_ подчеркивания в нескольких строках";
-
-            var result = MarkdownProcessor.WrapEm(input);
-
-            Assert.AreEqual("Текст <em>окруженный \nсимволами</em> подчеркивания в нескольких строках", result);
-        }
-
-        [Test]
-        public void not_wrap_double_underscores_to_em()
+        public void not_wrap_double_underscore_to_em()
         {
             var input = "Текст с двойным __ подчеркиванием";
 
             var result = MarkdownProcessor.WrapEm(input);
 
             Assert.AreEqual(input, result);
+        }
+
+        [Test]
+        public void not_wrap_single_underscores_in_text_and_digits_to_em()
+        {
+            var input = "Подчерки_внутри_текста__и__цифр_12_3 не считаются выделением";
+
+            var result = MarkdownProcessor.WrapEm(input);
+
+            Assert.AreEqual(input,result);
         }
 
         [Test]
@@ -280,31 +310,11 @@ namespace MarkdownProcessor
         [Test]
         public void wrap_text_between_first_and_second_two_double_underscores_to_strong()
         {
-            var input = "Текст __с __четырьмя__ двойными__ подчеркиваниями";
+            var input = "Текст __с __ четырьмя __ двойными__ подчеркиваниями";
 
             var result = MarkdownProcessor.WrapStrong(input);
 
-            Assert.AreEqual("Текст <strong>с </strong>четырьмя<strong> двойными</strong> подчеркиваниями", result);
-        }
-
-        [Test]
-        public void wrap_text_between_two_underscores_with_inner_double_underscore_to_em()
-        {
-            var input = "Внутри _выделения em может быть __ двойное подчеркивание_.";
-
-            var result = MarkdownProcessor.WrapEm(input);
-
-            Assert.AreEqual("Внутри <em>выделения em может быть __ двойное подчеркивание</em>.", result);
-        }
-
-        [Test]
-        public void wrap_text_between_two_underscores_with_inner_double_underscores_to_em()
-        {
-            var input = "Внутри _выделения em может быть __strong__ выделение_.";
-
-            var result = MarkdownProcessor.WrapEm(input);
-
-            Assert.AreEqual("Внутри <em>выделения em может быть __strong__ выделение</em>.", result);
+            Assert.AreEqual("Текст <strong>с </strong> четырьмя <strong> двойными</strong> подчеркиваниями", result);
         }
 
         [Test]
@@ -361,6 +371,16 @@ namespace MarkdownProcessor
         public void not_wrap_text_between_triple_underscore_and_double_underscore_to_strong()
         {
             var input = @"Тройные подчеркивания: ___Вот это__, не должно выделиться тегом strong";
+
+            var result = MarkdownProcessor.WrapStrong(input);
+
+            Assert.AreEqual(input, result);
+        }
+
+        [Test]
+        public void not_wrap_double_underscores_in_text_and_digits_to_strong()
+        {
+            var input = "Подчерки_внутри_текста__и__цифр_12_3 не считаются выделением";
 
             var result = MarkdownProcessor.WrapStrong(input);
 
@@ -428,7 +448,7 @@ namespace MarkdownProcessor
         }
 
         [Test]
-        public void escape_marks_in_code()
+        public void escape_marks_in_code_before_proceeding_processing()
         {
             var input ="Метки _внутри_ `одинарных _обратных_ кавычек` __должны__ экранироваться";
 
@@ -446,6 +466,8 @@ namespace MarkdownProcessor
 
             Assert.AreEqual(@"В конце `обработки` __необходимо_ убрать __экранирование__ всех меток", result);
         }
+
+
     }
 
 
