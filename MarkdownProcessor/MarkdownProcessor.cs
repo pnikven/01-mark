@@ -26,12 +26,9 @@ namespace MarkdownProcessor
 
         private static string GetFilename(string[] args)
         {
-            if (args.Length == 0)
-            {
-                Console.WriteLine("File name must be provided");
-                return "";
-            }
-            return args[0];
+            if (args.Length != 0) return args[0];
+            Console.WriteLine("File name must be provided");
+            return "";
         }
 
         private static string ReadSourceFile(string filename)
@@ -46,7 +43,13 @@ namespace MarkdownProcessor
         {
             var result = string.Join(PSeparator,
                 ExtractParagraphs(filecontent)
-                    .Select(p => WrapStrong(WrapEm(WrapCodeAndEscapeMarks(p)))));
+                    .Select(p => 
+                        WrapP(
+                        UnescapeMarks(
+                        WrapStrong(
+                        WrapEm(
+                        WrapCodeAndEscapeMarks(
+                        EscapeAngleBrackets(p))))))));
             return result;
         }
 
@@ -56,35 +59,55 @@ namespace MarkdownProcessor
                 sw.Write(result);
         }
 
-        public static string WrapDoubleNewlinesToParagraphs(string input)
+        public static string[] ExtractParagraphs(string input)
         {
-            if(input == null) throw new ArgumentException("input string must be provided");
-
-            var paragraphs = ExtractParagraphs(input);
-
-            if (paragraphs.Length == 0) return "<p></p>";
-
-            return string.Join(PSeparator, paragraphs );
-        }
-
-        private static string[] ExtractParagraphs(string input)
-        {
-            return Regex.Split(input, @"\n\s*\n", RegexOptions.Singleline)
+            if (input == null)
+                throw new ArgumentNullException("input string must be provided");
+            var result = Regex.Split(input, @"\n\s*\n", RegexOptions.Singleline)
                 .Where(st => st != "")
-                .Select(EscapeAngleBrackets)
-                .Select(p => "<p>"+p+"</p>")
                 .ToArray();
+            return result.Length > 0 ? result : new[] { "<p></p>" };
         }
 
-        private static string EscapeAngleBrackets(string st)
+        public static string EscapeAngleBrackets(string textForEscape)
         {
-            return st.Replace("<","&lt;").Replace(">","&gt;");
+            return textForEscape.Replace("<", "&lt;").Replace(">", "&gt;");
+        }
+
+        public static string WrapCodeAndEscapeMarks(string input)
+        {
+            var codeWrapped = WrapCode(input);
+            var marksEscaped = EscapeMarksInCode(codeWrapped);
+
+            return string.Join("", marksEscaped);
+        }
+
+        private static string WrapCode(string input)
+        {
+            var codeWrapped = Regex.Replace(input,
+                @"(?<![\\`])`(" + @"[^`]+" + @")(?<!\\)`(?!`)",
+                "<code>$1</code>");
+            return codeWrapped;
+        }
+
+        private static string[] EscapeMarksInCode(string textToEscape)
+        {
+            var escapeMarks = false;
+            var result = Regex.Split(textToEscape, "(<code>|</code>)")
+                .Select(st =>
+                {
+                    var resultString = escapeMarks ? st.Replace("_", "\\_") : st;
+                    escapeMarks = st == "<code>";
+                    return resultString;
+                }).ToArray();
+            return result;
         }
 
         public static string WrapEm(string input)
         {
             var result = Regex.Replace(input,
-                @"(?<![\\_])_(" + @"(_{2,}|[^_])+" + @")(?<!\\)_(?!_)", "<em>$1</em>");
+                @"(?<![\\_])_(" + @"(_{2,}|[^_])+" + @")(?<!\\)_(?!_)",
+                "<em>$1</em>");
 
             return result;
         }
@@ -92,26 +115,20 @@ namespace MarkdownProcessor
         public static string WrapStrong(string input)
         {
             var result = Regex.Replace(input,
-                @"(?<![\\_])__(?!_)(((?!__).)*)(?<![\\_])__(?!_)", "<strong>$1</strong>");
+                @"(?<![\\_])__(?!_)(((?!__).)*)(?<![\\_])__(?!_)",
+                "<strong>$1</strong>");
 
             return result;
         }
 
-        public static string WrapCodeAndEscapeMarks(string input)
+        public static string UnescapeMarks(string textWithEscapedMarks)
         {
-            var codeWrapped = Regex.Replace(input,
-                @"(?<![\\`])`(" + @"[^`]+" + @")(?<!\\)`(?!`)",
-                "<code>$1</code>");
-            var escapeMarks = false;
-            var marksEscaped = Regex.Split(codeWrapped, "(<code>|</code>)")
-                .Select(st =>
-                {
-                    var resultString = escapeMarks ? st.Replace("_", "\\_") : st;
-                    escapeMarks = st == "<code>";
-                    return resultString;
-                }).ToArray();
+            return textWithEscapedMarks.Replace(@"\_", "_").Replace(@"\`", "`");
+        }
 
-            return string.Join("",marksEscaped);
+        private static string WrapP(string input)
+        {
+            return "<p>" + input + "</p>";
         }
 
     }
@@ -120,12 +137,10 @@ namespace MarkdownProcessor
     public class MarkdownProcessor_should
     {
         [Test]
-        public void throw_argument_exception_on_null()
+        public void throw_argument_null_exception_on_null()
         {
-            string input = null;
-
-            var result = Assert.Throws<ArgumentException>(
-                () => MarkdownProcessor.WrapDoubleNewlinesToParagraphs(input));
+            var result = Assert.Throws<ArgumentNullException>(
+                () => MarkdownProcessor.ExtractParagraphs(null));
 
             StringAssert.Contains("input string must be provided", result.Message);
         }
@@ -135,9 +150,9 @@ namespace MarkdownProcessor
         {
             var input = "";
 
-            var result = MarkdownProcessor.WrapDoubleNewlinesToParagraphs(input);
+            var result = MarkdownProcessor.ExtractParagraphs(input);
 
-            Assert.AreEqual("<p></p>", result);
+            Assert.AreEqual(new[] {"<p></p>"}, result);
         }
 
         [Test]
@@ -145,9 +160,9 @@ namespace MarkdownProcessor
         {
             var input = "One sentence.";
 
-            var result = MarkdownProcessor.WrapDoubleNewlinesToParagraphs(input);
+            var result = MarkdownProcessor.ExtractParagraphs(input);
 
-            Assert.AreEqual("<p>One sentence.</p>", result);
+            Assert.AreEqual(new [] {"One sentence."}, result);
         }
 
         [Test]
@@ -155,9 +170,9 @@ namespace MarkdownProcessor
         {
             var input = "<p>One sentence.</p>";
 
-            var result = MarkdownProcessor.WrapDoubleNewlinesToParagraphs(input);
+            var result = MarkdownProcessor.EscapeAngleBrackets(input);
 
-            Assert.AreEqual("<p>&lt;p&gt;One sentence.&lt;/p&gt;</p>", result);
+            Assert.AreEqual("&lt;p&gt;One sentence.&lt;/p&gt;", result);
         }
 
         [Test]
@@ -165,19 +180,10 @@ namespace MarkdownProcessor
         {
             var input = "One sentence.\n    \nTwo sentence";
 
-            var result = MarkdownProcessor.WrapDoubleNewlinesToParagraphs(input);
+            var result = MarkdownProcessor.ExtractParagraphs(input);
 
-            Assert.AreEqual("<p>One sentence.</p>" + MarkdownProcessor.PSeparator + "<p>Two sentence</p>", result);
-        }
-
-        [Test]
-        public void join_two_paragraphs_by_PSeparator()
-        {
-            var input = "One sentence.\n    \nTwo sentence";
-
-            var result = MarkdownProcessor.WrapDoubleNewlinesToParagraphs(input);
-
-            Assert.AreEqual("<p>One sentence.</p>" + MarkdownProcessor.PSeparator + "<p>Two sentence</p>", 
+            Assert.AreEqual(
+                new[] {"One sentence.","Two sentence"},
                 result);
         }
 
@@ -429,7 +435,16 @@ namespace MarkdownProcessor
             var result = MarkdownProcessor.WrapCodeAndEscapeMarks(input);
 
             Assert.AreEqual(@"Метки _внутри_ <code>одинарных \_обратных\_ кавычек</code> __должны__ экранироваться", result);
+        }
 
+        [Test]
+        public void unescape_marks_finally()
+        {
+            var input = @"В конце \`обработки` \__необходимо_ убрать _\_экранирование_\_ всех меток";
+
+            var result = MarkdownProcessor.UnescapeMarks(input);
+
+            Assert.AreEqual(@"В конце `обработки` __необходимо_ убрать __экранирование__ всех меток", result);
         }
     }
 
