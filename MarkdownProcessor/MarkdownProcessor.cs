@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 
@@ -29,15 +30,27 @@ namespace MarkdownProcessor
         {
             if(input == null) throw new ArgumentException("input string must be provided");
 
-            var paragraphs = Regex.Split(input, PSeparatorPattern, RegexOptions.Singleline)
-                .Where(st => st != "")
-                .Select(st => st.StartsWith(POpen) ? st : POpen + st)
-                .Select(st => st.EndsWith(PClose) ? st : st + PClose)
-                .ToArray();
+            var paragraphs = ExtractParagraphs(input);
 
             if (paragraphs.Length == 0) return POpen + PClose;
             else
                 return string.Join(PSeparator, paragraphs );
+        }
+
+        private static string[] ExtractParagraphs(string input)
+        {
+            return Regex.Split(input, PSeparatorPattern, RegexOptions.Singleline)
+                .Where(st => st != "")
+                .Select(st => st.StartsWith(POpen) ? st : POpen + st)
+                .Select(st => st.EndsWith(PClose) ? st : st + PClose)
+                .ToArray();
+        }
+
+        public static string WrapEm(string input)
+        {
+            var result = Regex.Replace(input, "(?<!_)_([^_]+)_(?!_)", "<em>$1</em>");
+
+            return result;
         }
     }
 
@@ -116,6 +129,25 @@ namespace MarkdownProcessor
             Assert.AreEqual("<p>One sentence.</p>" + MarkdownProcessor.PSeparator + "<p>Two sentence</p>", result);
         }
 
+        [Test]
+        public void wrap_text_between_two_inderscores_to_em()
+        {
+            var input = "Текст _окруженный с двух сторон_  одинарными символами подчерка";
+
+            var result = MarkdownProcessor.WrapEm(input);
+
+            Assert.AreEqual("Текст <em>окруженный с двух сторон</em>  одинарными символами подчерка", result);
+        }
+
+        [Test]
+        public void not_wrap_text_between_two_double_inderscores_to_em()
+        {
+            var input = "Текст __окруженный с двух сторон__  двойными символами подчерка";
+
+            var result = MarkdownProcessor.WrapEm(input);
+
+            Assert.AreEqual("Текст __окруженный с двух сторон__  двойными символами подчерка", result);
+        }
 
     }
 
