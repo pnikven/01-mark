@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -10,8 +9,6 @@ namespace MarkdownProcessor
 {
     public class MarkdownProcessor
     {
-        private const string POpen = "<p>";
-        private const string PClose = "</p>";
         const string PSeparatorPattern = @"\n\s*\n";
         public const string PSeparator = "\n\n";
 
@@ -25,15 +22,15 @@ namespace MarkdownProcessor
             
             var filename = args[0];
 
-            var filecontent = "";
+            string filecontent;
             using (var sr = new StreamReader(filename, Encoding.UTF8))
                 filecontent = sr.ReadToEnd();
 
             var result = string.Join(PSeparator, 
                 ExtractParagraphs(filecontent)
-                .Select(p => WrapStrong(WrapEm(p))));
+                .Select(p => WrapCode(WrapStrong(WrapEm(p)))));
 
-            using (var sw = new System.IO.StreamWriter(filename+".html", false, Encoding.UTF8))
+            using (var sw = new StreamWriter(filename+".html", false, Encoding.UTF8))
                 sw.Write(result);
 
         }
@@ -44,9 +41,9 @@ namespace MarkdownProcessor
 
             var paragraphs = ExtractParagraphs(input);
 
-            if (paragraphs.Length == 0) return POpen + PClose;
-            else
-                return string.Join(PSeparator, paragraphs );
+            if (paragraphs.Length == 0) return "<p></p>";
+
+            return string.Join(PSeparator, paragraphs );
         }
 
         private static string[] ExtractParagraphs(string input)
@@ -78,6 +75,14 @@ namespace MarkdownProcessor
 
             return result;
         }
+
+        public static string WrapCode(string input)
+        {
+            var result = Regex.Replace(input,
+                @"(?<![\\`])`(" + @"[^`]+" + @")(?<!\\)`(?!`)", "<code>$1</code>");
+
+            return result;
+        }
     }
 
     [TestFixture]
@@ -99,7 +104,7 @@ namespace MarkdownProcessor
         {
             var input = "";
 
-            var result = MarkdownProcessor.WrapDoubleNewlinesToParagraphs("");
+            var result = MarkdownProcessor.WrapDoubleNewlinesToParagraphs(input);
 
             Assert.AreEqual("<p></p>", result);
         }
@@ -321,6 +326,66 @@ namespace MarkdownProcessor
             var input = @"Тройные подчеркивания: ___Вот это__, не должно выделиться тегом strong";
 
             var result = MarkdownProcessor.WrapStrong(input);
+
+            Assert.AreEqual(input, result);
+        }
+
+        [Test]
+        public void wrap_text_between_backticks_to_code()
+        {
+            var input = @"Текст окруженный `одинарными _обратными_ кавычками` -> code";
+
+            var result = MarkdownProcessor.WrapCode(input);
+
+            Assert.AreEqual(@"Текст окруженный <code>одинарными _обратными_ кавычками</code> -> code", result);
+        }
+
+        [Test]
+        public void not_wrap_text_between_two_escaped_backticks_to_code()
+        {
+            var input = @"Экранирование: \`Вот это\`, не должно выделиться тегом code";
+
+            var result = MarkdownProcessor.WrapCode(input);
+
+            Assert.AreEqual(input, result);
+        }
+
+        [Test]
+        public void not_wrap_text_between_double_backticks_to_code()
+        {
+            var input = @"Текст окруженный ``двойными _обратными_ кавычками`` ->X code";
+
+            var result = MarkdownProcessor.WrapCode(input);
+
+            Assert.AreEqual(input, result);
+        }
+
+        [Test]
+        public void not_wrap_double_backticks_to_code()
+        {
+            var input = @"Текст с `` двойными _обратными_ кавычками ->X code";
+
+            var result = MarkdownProcessor.WrapCode(input);
+
+            Assert.AreEqual(input, result);
+        }
+
+        [Test]
+        public void not_wrap_text_between_double_backtick_and_single_backtick_to_code()
+        {
+            var input = @"Текст с ``двойной и одинарной обратными кавычками` ->X code";
+
+            var result = MarkdownProcessor.WrapCode(input);
+
+            Assert.AreEqual(input, result);
+        }
+
+        [Test]
+        public void not_wrap_text_between_single_backtick_and_double_backtick_to_code()
+        {
+            var input = @"Текст с `одинарной и двойной обратными кавычками`` ->X code";
+
+            var result = MarkdownProcessor.WrapCode(input);
 
             Assert.AreEqual(input, result);
         }
