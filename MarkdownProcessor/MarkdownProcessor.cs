@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
@@ -21,7 +22,7 @@ namespace MarkdownProcessor
 
             var result = ProcessAndGetHtml(filecontent);
 
-            WriteHtmlFile(filename, result);
+            WriteHtmlFileInProgramDirectory(filename, result);
         }
 
         private static string GetFilename(string[] args)
@@ -52,10 +53,18 @@ namespace MarkdownProcessor
                         EscapeAngleBrackets(p))))))));
         }
 
-        private static void WriteHtmlFile(string filename, string result)
+        private static void WriteHtmlFileInProgramDirectory(string filename, string htmlContent)
         {
-            using (var sw = new StreamWriter(filename + ".html", false, Encoding.UTF8))
-                sw.Write(result);
+            using (var sw =
+                new StreamWriter(FormResultingHtmlFilename(filename), false, Encoding.UTF8))
+                sw.Write(htmlContent);
+        }
+
+        private static string FormResultingHtmlFilename(string filename)
+        {
+            var programDirecory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var htmlFilename = Path.GetFileNameWithoutExtension(filename) + ".html";
+            return Path.Combine(programDirecory, htmlFilename);
         }
 
         public static string[] ExtractParagraphs(string input)
@@ -380,13 +389,13 @@ namespace MarkdownProcessor
         }
 
         [Test]
-        public void wrap_text_between_backticks_to_code_with_escaped_marks()
+        public void wrap_text_between_backticks_to_code()
         {
             var input = @"Текст окруженный `одинарными _обратными_ кавычками` -> code";
 
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarksInCode(input);
+            var result = MarkdownProcessor.WrapCode(input);
 
-            Assert.AreEqual(@"Текст окруженный <code>одинарными \_обратными\_ кавычками</code> -> code", result);
+            Assert.AreEqual(@"Текст окруженный <code>одинарными _обратными_ кавычками</code> -> code", result);
         }
 
         [Test]
@@ -459,8 +468,6 @@ namespace MarkdownProcessor
             Assert.AreEqual(@"В конце `обработки` __необходимо_ убрать __экранирование__ всех меток", result);
         }
 
-
     }
-
 
 }
