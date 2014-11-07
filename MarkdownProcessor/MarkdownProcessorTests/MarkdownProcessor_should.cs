@@ -23,7 +23,7 @@ namespace MarkdownProcessor
         {
             var input = "One sentence.\n    \nTwo sentence";
 
-            var result = ParagraphsExtractor.ExtractParagraphs(input);
+            var result = ParagraphExtractor.ExtractParagraphs(input);
 
             Assert.AreEqual(
                 new[] {"One sentence.","Two sentence"},
@@ -231,76 +231,6 @@ namespace MarkdownProcessor
         }
 
         [Test]
-        public void wrap_text_between_backticks_to_code()
-        {
-            var input = @"Текст окруженный `одинарными _обратными_ кавычками` -> code";
-
-            var result = MarkdownProcessor.WrapCode(input);
-
-            Assert.AreEqual(@"Текст окруженный <code>одинарными _обратными_ кавычками</code> -> code", result);
-        }
-
-        [Test]
-        public void not_wrap_text_between_two_escaped_backticks_to_code()
-        {
-            var input = @"Экранирование: \`Вот это\`, не должно выделиться тегом code";
-
-            var result = MarkdownProcessor.WrapCode(input);
-
-            Assert.AreEqual(input, result);
-        }
-
-        [Test]
-        public void not_wrap_text_between_double_backticks_to_code()
-        {
-            var input = @"Текст окруженный ``двойными _обратными_ кавычками`` ->X code";
-
-            var result = MarkdownProcessor.WrapCode(input);
-
-            Assert.AreEqual(input, result);
-        }
-
-        [Test]
-        public void not_wrap_double_backticks_to_code()
-        {
-            var input = @"Текст с `` двойными _обратными_ кавычками ->X code";
-
-            var result = MarkdownProcessor.WrapCode(input);
-
-            Assert.AreEqual(input, result);
-        }
-
-        [Test]
-        public void not_wrap_text_between_double_backtick_and_single_backtick_to_code()
-        {
-            var input = @"Текст с ``двойной и одинарной обратными кавычками` ->X code";
-
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarksInCode(input);
-
-            Assert.AreEqual(input, result);
-        }
-
-        [Test]
-        public void not_wrap_text_between_single_backtick_and_double_backtick_to_code()
-        {
-            var input = @"Текст с `одинарной и двойной обратными кавычками`` ->X code";
-
-            var result = MarkdownProcessor.WrapCodeAndEscapeMarksInCode(input);
-
-            Assert.AreEqual(input, result);
-        }
-
-        [Test]
-        public void escape_marks_in_code_before_proceeding_processing()
-        {
-            var input ="Метки _внутри_ <code>тегов _кода_ code</code> __должны__ экранироваться";
-
-            var result = MarkdownProcessor.EscapeMarksInCode(input);
-
-            Assert.AreEqual(@"Метки _внутри_ <code>тегов \_кода\_ code</code> __должны__ экранироваться", result);
-        }
-
-        [Test]
         public void unescape_marks_finally()
         {
             var input = @"В конце \`обработки` \__необходимо_ убрать _\_экранирование_\_ всех меток";
@@ -308,6 +238,26 @@ namespace MarkdownProcessor
             var result = MarkdownProcessor.UnescapeMarks(input);
 
             Assert.AreEqual(@"В конце `обработки` __необходимо_ убрать __экранирование__ всех меток", result);
+        }
+
+        [Test]
+        public void test_from_email()
+        {
+            var input = @"__s_s__";
+
+            var result = MarkdownProcessor.WrapStrong(input);
+
+            Assert.AreEqual("<strong>s_s</strong>",result );
+        }
+
+        [Test]
+        public void test_from_email2()
+        {
+            var input = @"__s___s__";
+
+            var result = MarkdownProcessor.ProcessAndGetHtml(input);
+
+            Assert.AreEqual("<p><strong>s___s</strong></p>", result);
         }
 
     }

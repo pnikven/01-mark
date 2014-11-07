@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace MarkdownProcessor
 {
-    class ParagraphsExtractor
+    class ParagraphExtractor
     {
         private const string ParagraphsRegexSplitter = @"\n\s*\n";
 

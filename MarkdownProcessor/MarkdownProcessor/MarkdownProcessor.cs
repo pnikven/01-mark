@@ -22,48 +22,24 @@ namespace MarkdownProcessor
             fileManager.WriteFile("result.html", result);
         }   
 
-        private static string ProcessAndGetHtml(string filecontent)
+        public  static string ProcessAndGetHtml(string filecontent)
         {
-            return string.Join("\n",
-                ParagraphsExtractor.ExtractParagraphs(filecontent)
-                    .Select(p => 
-                        WrapP(
-                        UnescapeMarks(
-                        WrapStrong(
-                        WrapEm(
-                        WrapCodeAndEscapeMarksInCode(
-                        EscapeAngleBrackets(p))))))));
+            var paragraphs = ParagraphExtractor.ExtractParagraphs(filecontent);
+            var processedParagraphs = paragraphs
+                .Select(ParagraphPreprocessor.PreprocessParagraph)
+                .Select(CodeWrapper.Wrap)
+                .Select(ParagraphPreprocessor.ReplaceUnderscoresInCodeToEntities)
+                .Select(WrapEm)
+                .Select(WrapStrong)
+                .Select(WrapP)
+                .Select(ParagraphPreprocessor.PostprocessParagraph);
+
+            return string.Join("\n", processedParagraphs);
         }
 
         public static string EscapeAngleBrackets(string textForEscape)
         {
             return textForEscape.Replace("<", "&lt;").Replace(">", "&gt;");
-        }
-
-        public static string WrapCodeAndEscapeMarksInCode(string input)
-        {
-            var codeWrapped = WrapCode(input);
-            return EscapeMarksInCode(codeWrapped);
-        }
-
-        public static string WrapCode(string input)
-        {
-            return Regex.Replace(input,
-                @"(?<![\\`])`(" + @"[^`]+" + @")(?<!\\)`(?!`)",
-                "<code>$1</code>");
-        }
-
-        public static string EscapeMarksInCode(string textToEscape)
-        {
-            var escapeMarks = false;
-            var result = Regex.Split(textToEscape, "(<code>|</code>)")
-                .Select(st =>
-                {
-                    var resultString = escapeMarks ? st.Replace("_", "\\_") : st;
-                    escapeMarks = st == "<code>";
-                    return resultString;
-                }).ToArray();
-            return string.Join("", result);
         }
 
         public static string WrapEm(string input)

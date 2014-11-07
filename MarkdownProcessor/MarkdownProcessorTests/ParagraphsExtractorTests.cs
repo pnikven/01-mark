@@ -9,7 +9,7 @@ namespace MarkdownProcessor.MarkdownProcessorTests
         public void ExtractParagraphs_OnNull_ThrowsException()
         {
             var result = Assert.Throws<ArgumentNullException>(
-                () => ParagraphsExtractor.ExtractParagraphs(null));
+                () => ParagraphExtractor.ExtractParagraphs(null));
 
             StringAssert.Contains("markdown text must be provided", result.Message);
         }
@@ -19,7 +19,7 @@ namespace MarkdownProcessor.MarkdownProcessorTests
         {
             var input = "";
 
-            var result = ParagraphsExtractor.ExtractParagraphs(input);
+            var result = ParagraphExtractor.ExtractParagraphs(input);
 
             Assert.AreEqual(new string[] {  }, result);
         }
@@ -29,7 +29,7 @@ namespace MarkdownProcessor.MarkdownProcessorTests
         {
             var input = "One sentence.";
 
-            var result = ParagraphsExtractor.ExtractParagraphs(input);
+            var result = ParagraphExtractor.ExtractParagraphs(input);
 
             Assert.AreEqual(new[] { "One sentence." }, result);
         }
