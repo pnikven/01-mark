@@ -44,13 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyManager.cs" />
-    <Compile Include="ConsoleParameterManager.cs" />
-    <Compile Include="FileManager.cs" />
-    <Compile Include="IAssemblyManager.cs" />
-    <Compile Include="IFileManager.cs" />
-    <Compile Include="IParameterManager.cs" />
-    <Compile Include="MarkdownProcessor.cs" />
+    <Compile Include="AssemblyManager\AssemblyManager.cs" />
+    <Compile Include="MarkdownProcessorTests\MarkdownProcessor_should.cs" />
+    <Compile Include="MarkdownProcessorTests\ParagraphsExtractorTests.cs" />
+    <Compile Include="MarkdownProcessor\ParagraphsExtractor.cs" />
+    <Compile Include="ParameterManager\ConsoleParameterManager.cs" />
+    <Compile Include="FileManager\FileManager.cs" />
+    <Compile Include="AssemblyManager\IAssemblyManager.cs" />
+    <Compile Include="FileManager\IFileManager.cs" />
+    <Compile Include="ParameterManager\IParameterManager.cs" />
+    <Compile Include="MarkdownProcessor\MarkdownProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
