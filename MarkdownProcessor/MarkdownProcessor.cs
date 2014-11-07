@@ -10,39 +10,22 @@ namespace MarkdownProcessor
 {
     public class MarkdownProcessor
     {
-        // used to join paragraphs in resulting html for source readability
-        public const string PSeparator = "\n\n"; 
-
         static void Main(string[] args)
         {
-            var filename = GetFilename(args);
-            if (filename == "") return;
+            IParameterManager parameterManager=new ConsoleParameterManager();
+            var filename = parameterManager.GetFirstParameter(args);
 
-            var filecontent = ReadSourceFile(filename);
+            IFileManager fileManager = new FileManager();
+            var fileContent = fileManager.ReadFile(filename);
 
-            var result = ProcessAndGetHtml(filecontent);
+            var result = ProcessAndGetHtml(fileContent);
 
-            WriteHtmlFileInProgramDirectory(filename, result);
-        }
-
-        private static string GetFilename(string[] args)
-        {
-            if (args.Length != 0) return args[0];
-            Console.WriteLine("File name must be provided");
-            return "";
-        }
-
-        private static string ReadSourceFile(string filename)
-        {
-            string filecontent;
-            using (var sr = new StreamReader(filename, Encoding.UTF8))
-                filecontent = sr.ReadToEnd();
-            return filecontent;
-        }
+            fileManager.WriteFile("result.html", result);
+        }   
 
         private static string ProcessAndGetHtml(string filecontent)
         {
-            return string.Join(PSeparator,
+            return string.Join("\n",
                 ExtractParagraphs(filecontent)
                     .Select(p => 
                         WrapP(
@@ -51,20 +34,6 @@ namespace MarkdownProcessor
                         WrapEm(
                         WrapCodeAndEscapeMarksInCode(
                         EscapeAngleBrackets(p))))))));
-        }
-
-        private static void WriteHtmlFileInProgramDirectory(string filename, string htmlContent)
-        {
-            using (var sw =
-                new StreamWriter(FormResultingHtmlFilename(filename), false, Encoding.UTF8))
-                sw.Write(htmlContent);
-        }
-
-        private static string FormResultingHtmlFilename(string filename)
-        {
-            var programDirecory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var htmlFilename = Path.GetFileNameWithoutExtension(filename) + ".html";
-            return Path.Combine(programDirecory, htmlFilename);
         }
 
         public static string[] ExtractParagraphs(string input)
