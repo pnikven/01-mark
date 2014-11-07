@@ -47,9 +47,12 @@
     <Compile Include="AssemblyManager\AssemblyManager.cs" />
     <Compile Include="MarkdownProcessorTests\MarkdownProcessor_should.cs" />
     <Compile Include="MarkdownProcessorTests\ParagraphsExtractorTests.cs" />
-    <Compile Include="MarkdownProcessor\CodeWrapper.cs" />
+    <Compile Include="MarkdownProcessorTests\TagWrapperTestsForEm.cs" />
+    <Compile Include="MarkdownProcessorTests\TagWrapperTestsForCode.cs" />
+    <Compile Include="MarkdownProcessorTests\TagWrapperTestsForStrong.cs" />
     <Compile Include="MarkdownProcessor\ParagraphPreprocessor.cs" />
     <Compile Include="MarkdownProcessor\ParagraphExtractor.cs" />
+    <Compile Include="MarkdownProcessor\TagWrapper.cs" />
     <Compile Include="ParameterManager\ConsoleParameterManager.cs" />
     <Compile Include="FileManager\FileManager.cs" />
     <Compile Include="AssemblyManager\IAssemblyManager.cs" />

@@ -26,7 +26,16 @@ namespace MarkdownProcessor
             var preprocessedParagraph = ReplaceEscapedMarksToEntities(paragraph);
             preprocessedParagraph = ReplaceUnderscoresInTextAndDigitsToEntities(preprocessedParagraph);
             preprocessedParagraph = ReplaceMultiBackticksToEntities(preprocessedParagraph);
+            preprocessedParagraph = ReplaceMultiUnderscoresToEntities(preprocessedParagraph);
             return preprocessedParagraph;
+        }
+
+        public static string ReplaceEscapedMarksToEntities(string paragraph)
+        {
+            return ReplacementForMark
+                    .Keys
+                    .Aggregate(paragraph, (currentParagraph, escapedMark) =>
+                        currentParagraph.Replace(@"\" + escapedMark, @"\" + ReplacementForMark[escapedMark]));
         }
 
         public static string ReplaceUnderscoresInTextAndDigitsToEntities(string paragraph)
@@ -39,6 +48,11 @@ namespace MarkdownProcessor
         public static string ReplaceMultiBackticksToEntities(string paragraph)
         {
             return ReplaceInvalidMarksToEntities(paragraph, "``+", "`");
+        }
+
+        public static string ReplaceMultiUnderscoresToEntities(string paragraph)
+        {
+            return ReplaceInvalidMarksToEntities(paragraph, "___+", "_");
         }
 
         public static string ReplaceUnderscoresInCodeToEntities(string paragraph)
@@ -54,14 +68,6 @@ namespace MarkdownProcessor
                 .OrderByDescending(match=>match.Length)
                 .Aggregate(paragraph, (currentParagraph, match) =>
                     currentParagraph.Replace(match, match.Replace(mark, ReplacementForMark[mark])));
-        }
-
-        public static  string ReplaceEscapedMarksToEntities(string paragraph)
-        {
-            return ReplacementForMark
-                    .Keys
-                    .Aggregate(paragraph, (currentParagraph, escapedMark) =>
-                        currentParagraph.Replace(@"\"+escapedMark, @"\"+ReplacementForMark[escapedMark]));
         }
 
         public static string PostprocessParagraph(string paragraph)
@@ -122,6 +128,16 @@ namespace MarkdownProcessor
             var result = ParagraphPreprocessor.ReplaceMultiBackticksToEntities(input);
 
             Assert.AreEqual("Повторяющиеся цепочки обратных <BT><BT> кавычек <BT><BT><BT> заменяются на примитивы.", result);
+        }
+
+        [Test]
+        public void ReplaceMultiUnderscoresToEntities_MultiUnderscores_ReplacesToEntities()
+        {
+            var input = "Повторяющиеся __цепочки___ более двух __ подчерков ___заменяются ____на примитивы.";
+
+            var result = ParagraphPreprocessor.ReplaceMultiUnderscoresToEntities(input);
+
+            Assert.AreEqual("Повторяющиеся __цепочки<US><US><US> более двух __ подчерков <US><US><US>заменяются <US><US><US><US>на примитивы.", result);
         }
 
         [Test]

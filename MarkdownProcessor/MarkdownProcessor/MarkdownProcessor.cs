@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using NUnit.Framework.Constraints;
 
 namespace MarkdownProcessor
 {
@@ -25,12 +26,17 @@ namespace MarkdownProcessor
         public  static string ProcessAndGetHtml(string filecontent)
         {
             var paragraphs = ParagraphExtractor.ExtractParagraphs(filecontent);
+
+            var codeWrapper = new TagWrapper(TagName.Code);
+            var emWrapper = new TagWrapper(TagName.Em);
+            var strongWrapper = new TagWrapper(TagName.Strong);
+
             var processedParagraphs = paragraphs
                 .Select(ParagraphPreprocessor.PreprocessParagraph)
-                .Select(CodeWrapper.Wrap)
+                .Select(codeWrapper.Wrap)
                 .Select(ParagraphPreprocessor.ReplaceUnderscoresInCodeToEntities)
-                .Select(WrapEm)
-                .Select(WrapStrong)
+                .Select(emWrapper.Wrap)
+                .Select(strongWrapper.Wrap)
                 .Select(WrapP)
                 .Select(ParagraphPreprocessor.PostprocessParagraph);
 
@@ -40,25 +46,6 @@ namespace MarkdownProcessor
         public static string EscapeAngleBrackets(string textForEscape)
         {
             return textForEscape.Replace("<", "&lt;").Replace(">", "&gt;");
-        }
-
-        public static string WrapEm(string input)
-        {
-            return Regex.Replace(input,
-                @"(?<![\\_\w])_(" + @"(_{2,}|[^_])+" + @")(?<!\\)_(?![_\w])",
-                "<em>$1</em>");
-        }
-
-        public static string WrapStrong(string input)
-        {
-            return Regex.Replace(input,
-                @"(?<![\\_\w])__(?!_)(((?!__).)*)(?<![\\_])__(?![_\w])",
-                "<strong>$1</strong>");
-        }
-
-        public static string UnescapeMarks(string textWithEscapedMarks)
-        {
-            return textWithEscapedMarks.Replace(@"\_", "_").Replace(@"\`", "`");
         }
 
         private static string WrapP(string input)
