@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="AssemblyManager\AssemblyManager.cs" />
     <Compile Include="MarkdownParserTests\MarkdownParserTests.cs" />
+    <Compile Include="Parser\ParagraphNode.cs" />
     <Compile Include="MarkdownParserTests\ParagraphsExtractorTests.cs" />
     <Compile Include="MarkdownParserTests\TagWrapperTestsForEm.cs" />
     <Compile Include="MarkdownParserTests\TagWrapperTestsForCode.cs" />

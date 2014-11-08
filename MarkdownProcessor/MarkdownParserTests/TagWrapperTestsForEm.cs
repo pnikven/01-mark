@@ -11,7 +11,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         [SetUp]
         public void Setup()
         {
-            emWrapper=new TagWrapper(TagName.Em);
+            emWrapper = new TagWrapper(NodeType.Em);
         }
 
         [TestCase("Текст _окруженный с двух сторон_  одинарными символами подчерка",

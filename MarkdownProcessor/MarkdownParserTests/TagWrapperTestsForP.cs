@@ -10,7 +10,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         [SetUp]
         public void Setup()
         {
-            pWrapper = new TagWrapper(TagName.P);
+            pWrapper = new TagWrapper(NodeType.Root);
         }
 
         [TestCase("Предложение из одной строки.",

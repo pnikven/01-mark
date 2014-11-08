@@ -11,7 +11,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         [SetUp]
         public void Setup()
         {
-            codeWrapper = new TagWrapper(TagName.Code);
+            codeWrapper = new TagWrapper(NodeType.Code);
         }
 
         [Test]

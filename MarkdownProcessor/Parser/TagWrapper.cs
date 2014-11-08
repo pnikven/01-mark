@@ -3,41 +3,37 @@ using System.Text.RegularExpressions;
 
 namespace MarkdownProcessor.Parser
 {
-    public enum TagName
-    {
-        Code,
-        Em,
-        Strong,
-        P
-    }
-
     public class TagWrapper
     {
-        private string MarkdownCapturePattern { get; set; }
+        public string MarkdownCapturePattern { get; set; }
         private string ReplacementPattern { get; set; }
 
-        public TagWrapper(TagName tagName)
+        public TagWrapper(NodeType nodeType)
         {
-            switch (tagName)
+            switch (nodeType)
             {
-                case TagName.Code:
+                case NodeType.Code:
                     MarkdownCapturePattern = "`([^`]+)`";
                     ReplacementPattern = "<code>$1</code>";
                     break;
-                case TagName.Em:
+                case NodeType.Em:
                     MarkdownCapturePattern = "(?<!_)_((?:[^_]|[^_]+__+[^_]+)+?)_(?!_)";
                     ReplacementPattern = "<em>$1</em>";
                     break;
-                case TagName.Strong:
+                case NodeType.Strong:
                     MarkdownCapturePattern = "(?<!_)__((?:[^_]|[^_]+_+[^_]+)+?)__(?!_)";
                     ReplacementPattern = "<strong>$1</strong>";
                     break;
-                case TagName.P:
+                case NodeType.Root:
                     MarkdownCapturePattern = "(^.*$)";
                     ReplacementPattern = "<p>$1</p>";
                     break;
+                case NodeType.Text:
+                    MarkdownCapturePattern = "([^"+ParagraphPreprocessor.AllMarkers+"]+)";
+                    ReplacementPattern = "$1";
+                    break;
                 default:
-                    throw new ArgumentOutOfRangeException("tagName");
+                    throw new ArgumentOutOfRangeException("nodeType");
             }
         }
 
@@ -54,9 +50,9 @@ namespace MarkdownProcessor.Parser
             return Wrap(input);
         }
 
-        public static TagWrapper Create(TagName tagName)
+        public static TagWrapper Create(NodeType tagType)
         {
-            return new TagWrapper(tagName);
+            return new TagWrapper(tagType);
         }
     }
 }

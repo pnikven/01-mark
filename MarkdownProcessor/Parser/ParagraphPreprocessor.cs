@@ -16,6 +16,8 @@ namespace MarkdownProcessor.Parser
                     {"`", BacktickReplacement}
             };
 
+        public static string AllMarkers = string.Join("",ReplacementForMark.Keys.ToArray());
+
         public static string EscapeAngleBrackets(string textForEscape)
         {
             return textForEscape.Replace("<", "&lt;").Replace(">", "&gt;");

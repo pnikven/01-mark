@@ -11,7 +11,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         [SetUp]
         public void Setup()
         {
-            strongWrapper = new TagWrapper(TagName.Strong);
+            strongWrapper = new TagWrapper(NodeType.Strong);
         }
 
         [TestCase("Текст с __двумя символами__ — д.б. жирным",
