@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Dynamic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -37,23 +35,21 @@ namespace MarkdownProcessor.Parser
 
             var parsedParagraphs = preprocessedParagraphs.Select(ParseParagraph);
 
-            /*
-                .Select(TagWrapper.Create(TagName.Code).Wrap)
-                .Select(ParagraphPreprocessor.ReplaceUnderscoresInCodeToEntities)
-                .Select(TagWrapper.Create(TagName.Em).Wrap)
-                .Select(TagWrapper.Create(TagName.Strong).Wrap)
-                .Select(TagWrapper.Create(TagName.Root).Wrap)
-                .Select(ParagraphPreprocessor.PostprocessParagraph);
-
-             */
             var postprocessedParagraphs = parsedParagraphs.Select(ParagraphPreprocessor.PostprocessParagraph);
 
             return string.Join("\n", postprocessedParagraphs);
         }
 
+        public static string NormalizeLineEndings(string text)
+        {
+            return
+                new[] { "\r\n", "\n\r", "\r" }
+                .Aggregate(text, (current, lineEnd) => current.Replace(lineEnd, "\n"));
+        }
+
         public static string ParseParagraph(string paragraph)
         {
-            var paragraphTree = BuildNode(NodeType.Root, paragraph);
+            var paragraphTree = BuildNode(NodeType.P, paragraph);
 
             return paragraphTree.ToString();
         }
@@ -66,6 +62,11 @@ namespace MarkdownProcessor.Parser
                 node.SetText(remainingText);
                 return node;
             }
+            if (nodeType == NodeType.Code)
+            {
+                node.AddChild(BuildNode(NodeType.Text, remainingText));
+                return node;
+            }
 
             while (remainingText != "")
             {
@@ -76,17 +77,12 @@ namespace MarkdownProcessor.Parser
             return node;
         }    
 
-        private static string GetConsumedText(string innerText, NodeType type)
-        {
-            return Regex.Match(innerText, GetMarkdownPattern(type)).ToString();
-        }
-
         public static NodeInfo IdentifyCurrentNode(string text)
         {
             foreach (var type in Enum.GetValues(typeof(NodeType)))
             {
-                if ((NodeType)type == NodeType.Root) continue;
-                var match = Regex.Match(text, GetMarkdownPattern(type));
+                if ((NodeType)type == NodeType.P) continue;
+                var match = Regex.Match(text, TagMapper.GetMarkdownCapturePattern((NodeType)type));
                 if (match.Success)
                     return new NodeInfo((NodeType)type, match.ToString().Length, match.Groups[1].ToString());
             }
@@ -94,18 +90,6 @@ namespace MarkdownProcessor.Parser
             var i = 1;
             while (i<text.Length && text[i] == currentMarker) i++;
             return new NodeInfo(NodeType.Text, i, new string(currentMarker,i));
-        }
-
-        private static string GetMarkdownPattern(object type)
-        {
-            return "^" + TagWrapper.Create((NodeType)type).MarkdownCapturePattern;
-        }
-
-        public static string NormalizeLineEndings(string text)
-        {
-            return
-                new[] {"\r\n", "\n\r", "\r"}
-                .Aggregate(text, (current, lineEnd) => current.Replace(lineEnd, "\n"));
         }
     }
 }

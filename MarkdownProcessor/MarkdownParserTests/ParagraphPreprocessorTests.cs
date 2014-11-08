@@ -65,15 +65,5 @@ namespace MarkdownProcessor.MarkdownParserTests
 
             Assert.AreEqual("Повторяющиеся __цепочки<US><US><US> более _двух __ подчерков <US><US><US>заменяются <US><US><US><US>на примитивы.", result);
         }
-
-        [Test]
-        public void ReplaceUnderscoresInCodeToEntities_UnderscoresInCode_ReplacesToEntities()
-        {
-            var input = "Предложение <code>с _подчеркиваниями_ внутри</code> _фрагментов_ , <code>заключенных __в__ тег</code> code.";
-
-            var result = ParagraphPreprocessor.ReplaceUnderscoresInCodeToEntities(input);
-
-            Assert.AreEqual("Предложение <code>с <US>подчеркиваниями<US> внутри</code> _фрагментов_ , <code>заключенных <US><US>в<US><US> тег</code> code.", result);
-        }
     }
 }

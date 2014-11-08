@@ -3,23 +3,15 @@ using NUnit.Framework;
 
 namespace MarkdownProcessor.MarkdownParserTests
 {
-    class TagWrapperTestsForP
+    class MarkdownParserTestsForP
     {
-        private TagWrapper pWrapper = null;
-
-        [SetUp]
-        public void Setup()
-        {
-            pWrapper = new TagWrapper(NodeType.Root);
-        }
-
         [TestCase("Предложение из одной строки.",
             "<p>Предложение из одной строки.</p>")]
         [TestCase("Предложение из нескольких строк.\nВторая строка\nТретья строка...",
             "<p>Предложение из нескольких строк.\nВторая строка\nТретья строка...</p>")]
-        public void Wrap_AnyString_ToP(string input, string expected)
+        public void Parse_AnyString_ToP(string input, string expected)
         {
-            var result = pWrapper.Wrap(input, true);
+            var result = MarkdownParser.Parse(input);
 
             Assert.AreEqual(expected, result);
         }

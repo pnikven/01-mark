@@ -6,18 +6,6 @@ namespace MarkdownProcessor.Parser
 {
     class ParagraphPreprocessor
     {
-        private const string UnderscoreReplacement = "<US>";
-        private const string BacktickReplacement = "<BT>";
-
-        private static readonly Dictionary<string, string> ReplacementForMark = 
-            new Dictionary<string, string>()
-            {
-                    {"_", UnderscoreReplacement},
-                    {"`", BacktickReplacement}
-            };
-
-        public static string AllMarkers = string.Join("",ReplacementForMark.Keys.ToArray());
-
         public static string EscapeAngleBrackets(string textForEscape)
         {
             return textForEscape.Replace("<", "&lt;").Replace(">", "&gt;");
@@ -25,19 +13,23 @@ namespace MarkdownProcessor.Parser
 
         public static string PreprocessParagraph(string paragraph)
         {
-            var preprocessedParagraph = ReplaceEscapedMarksToEntities(paragraph);
-            preprocessedParagraph = ReplaceUnderscoresInTextAndDigitsToEntities(preprocessedParagraph);
-            preprocessedParagraph = ReplaceMultiBackticksToEntities(preprocessedParagraph);
-            preprocessedParagraph = ReplaceMultiUnderscoresToEntities(preprocessedParagraph);
-            return preprocessedParagraph;
+            var p = ReplaceEscapedMarksToEntities(paragraph);
+
+            p = ReplaceUnderscoresInTextAndDigitsToEntities(p);
+
+            p = ReplaceMultiBackticksToEntities(p);
+
+            p = ReplaceMultiUnderscoresToEntities(p);
+
+            return p;
         }
 
         public static string ReplaceEscapedMarksToEntities(string paragraph)
         {
-            return ReplacementForMark
+            return TagMapper.ReplacementForMark
                     .Keys
                     .Aggregate(paragraph, (currentParagraph, escapedMark) =>
-                        currentParagraph.Replace(@"\" + escapedMark, @"\" + ReplacementForMark[escapedMark]));
+                        currentParagraph.Replace(@"\" + escapedMark, @"\" + TagMapper.ReplacementForMark[escapedMark]));
         }
 
         public static string ReplaceUnderscoresInTextAndDigitsToEntities(string paragraph)
@@ -57,11 +49,6 @@ namespace MarkdownProcessor.Parser
             return ReplaceInvalidMarksToEntities(paragraph, "___+", "_");
         }
 
-        public static string ReplaceUnderscoresInCodeToEntities(string paragraph)
-        {
-            return ReplaceInvalidMarksToEntities(paragraph, "<code>.*?_+.*?</code>", "_");
-        }
-
         private static string ReplaceInvalidMarksToEntities(string paragraph, string pattern, string mark)
         {
             var matches =
@@ -69,22 +56,21 @@ namespace MarkdownProcessor.Parser
             return matches
                 .OrderByDescending(match=>match.Length)
                 .Aggregate(paragraph, (currentParagraph, match) =>
-                    currentParagraph.Replace(match, match.Replace(mark, ReplacementForMark[mark])));
+                    currentParagraph.Replace(match, match.Replace(mark, TagMapper.ReplacementForMark[mark])));
         }
 
         public static string PostprocessParagraph(string paragraph)
         {
-            var result = ReplaceEntitiesToTextRepresentation(paragraph);
-            return result;
+            return ReplaceEntitiesToTextRepresentation(paragraph);
         }
 
         public static string ReplaceEntitiesToTextRepresentation(string paragraph)
         {
-            return ReplacementForMark
+            return TagMapper.ReplacementForMark
                     .Values
                     .Aggregate(paragraph, (currentParagraph, entity) =>
                         currentParagraph.Replace(entity, 
-                            ReplacementForMark.First(v=>v.Value==entity).Key));            
+                            TagMapper.ReplacementForMark.First(v=>v.Value==entity).Key));            
         }
 
     }

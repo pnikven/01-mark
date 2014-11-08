@@ -1,19 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 
 namespace MarkdownProcessor.Parser
 {
-    public enum NodeType
-    {
-        Root,
-        Code,
-        Em,
-        Strong,
-        Text
-    }
-
     class ParagraphNode
     {
         NodeType ParagraphNodeType { get; set; }
@@ -49,7 +39,7 @@ namespace MarkdownProcessor.Parser
             string tagName;
             switch (ParagraphNodeType)
             {
-                case NodeType.Root:
+                case NodeType.P:
                     tagName = "p";
                     break;
                 case NodeType.Code:

@@ -45,18 +45,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyManager\AssemblyManager.cs" />
-    <Compile Include="MarkdownParserTests\MarkdownParserTests.cs" />
+    <Compile Include="MarkdownParserTests\MarkdownParserTestsOther.cs" />
     <Compile Include="Parser\ParagraphNode.cs" />
     <Compile Include="MarkdownParserTests\ParagraphsExtractorTests.cs" />
-    <Compile Include="MarkdownParserTests\TagWrapperTestsForEm.cs" />
-    <Compile Include="MarkdownParserTests\TagWrapperTestsForCode.cs" />
-    <Compile Include="MarkdownParserTests\TagWrapperTestsForP.cs" />
-    <Compile Include="MarkdownParserTests\TagWrapperTestsForStrong.cs" />
+    <Compile Include="MarkdownParserTests\MarkdownParserTestsForEm.cs" />
+    <Compile Include="MarkdownParserTests\MarkdownParserTestsForCode.cs" />
+    <Compile Include="MarkdownParserTests\MarkdownParserTestsForP.cs" />
+    <Compile Include="MarkdownParserTests\MarkdownParserTestsForStrong.cs" />
     <Compile Include="Parser\ParagraphPreprocessor.cs" />
     <Compile Include="Parser\ParagraphExtractor.cs" />
     <Compile Include="MarkdownParserTests\ParagraphPreprocessorTests.cs" />
     <Compile Include="Parser\MarkdownParser.cs" />
-    <Compile Include="Parser\TagWrapper.cs" />
+    <Compile Include="Parser\TagMapper.cs" />
     <Compile Include="ParameterManager\ConsoleParameterManager.cs" />
     <Compile Include="FileManager\FileManager.cs" />
     <Compile Include="AssemblyManager\IAssemblyManager.cs" />
