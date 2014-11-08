@@ -1,6 +1,7 @@
+using MarkdownProcessor.Parser;
 using NUnit.Framework;
 
-namespace MarkdownProcessor
+namespace MarkdownProcessor.MarkdownParserTests
 {
     [TestFixture]
     class TagWrapperTestsForCode
@@ -14,7 +15,7 @@ namespace MarkdownProcessor
         }
 
         [Test]
-        public void Wrap_TextBetweenBackticks_WrapByTagCode()
+        public void Wrap_TextBetweenBackticks_ToCode()
         {
             var input = @"Текст окруженный `одинарными _обратными_ кавычками` -> code";
 
@@ -24,7 +25,7 @@ namespace MarkdownProcessor
         }
 
         [Test]
-        public void Wrap_TextBetweenTwoEscapedBackticks_NotWrapToCode()
+        public void Wrap_EscapedBackticks_Ignore()
         {
             var input = @"Экранирование: \`Вот это\`, не должно выделиться тегом code";
 
@@ -43,7 +44,7 @@ namespace MarkdownProcessor
             "Текст с `одинарной и двойной обратными кавычками`` ->X code")]
         [TestCase("Текст с `окруженный обратными кавычками с повторяющимися обратными ``` кавычками` внутри",
             "Текст с <code>окруженный обратными кавычками с повторяющимися обратными ``` кавычками</code> внутри")]
-        public void Wrap_MutliBackticks_NotRecognizeAsMarks(string input, string expected)
+        public void Wrap_NotSingleBackticks_Ignore(string input, string expected)
         {
             var result = codeWrapper.Wrap(input, true);
 

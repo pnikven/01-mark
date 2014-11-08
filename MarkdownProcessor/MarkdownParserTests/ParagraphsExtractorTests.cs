@@ -1,7 +1,8 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
+using MarkdownProcessor.Parser;
+using NUnit.Framework;
 
-namespace MarkdownProcessor.MarkdownProcessorTests
+namespace MarkdownProcessor.MarkdownParserTests
 {
     class ParagraphsExtractorTests
     {

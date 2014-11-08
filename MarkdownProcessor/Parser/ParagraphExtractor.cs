@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace MarkdownProcessor
+namespace MarkdownProcessor.Parser
 {
     class ParagraphExtractor
     {
