@@ -19,11 +19,11 @@ namespace MarkdownProcessor.MarkdownParserTests
         [Test]
         public void ReplaceUnderscoresInTextAndDigitsToEntities_UnderscoresInTextAndDigits_ReplacesToEntities()
         {
-            var input = @"Подчерки_внутри_текста__и__цифр_12_3 не _считаются_ выделением _и должны_ оставаться символами_подчерка.";
+            var input = @"РџРѕРґС‡РµСЂРєРё_РІРЅСѓС‚СЂРё_С‚РµРєСЃС‚Р°__Рё__С†РёС„СЂ_12_3 РЅРµ _СЃС‡РёС‚Р°СЋС‚СЃСЏ_ РІС‹РґРµР»РµРЅРёРµРј _Рё РґРѕР»Р¶РЅС‹_ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ СЃРёРјРІРѕР»Р°РјРё_РїРѕРґС‡РµСЂРєР°.";
 
             var result = ParagraphPreprocessor.ReplaceUnderscoresInTextAndDigitsToEntities(input);
 
-            Assert.AreEqual(@"Подчерки<US>внутри<US>текста<US><US>и<US><US>цифр<US>12<US>3 не _считаются_ выделением _и должны_ оставаться символами<US>подчерка.", result);
+            Assert.AreEqual(@"РџРѕРґС‡РµСЂРєРё<US>РІРЅСѓС‚СЂРё<US>С‚РµРєСЃС‚Р°<US><US>Рё<US><US>С†РёС„СЂ<US>12<US>3 РЅРµ _СЃС‡РёС‚Р°СЋС‚СЃСЏ_ РІС‹РґРµР»РµРЅРёРµРј _Рё РґРѕР»Р¶РЅС‹_ РѕСЃС‚Р°РІР°С‚СЊСЃСЏ СЃРёРјРІРѕР»Р°РјРё<US>РїРѕРґС‡РµСЂРєР°.", result);
         }
 
         [Test]
@@ -49,21 +49,21 @@ namespace MarkdownProcessor.MarkdownParserTests
         [Test]
         public void ReplaceMultiBackticksToEntities_MultiBackticks_ReplacesToEntities()
         {
-            var input = "Повторяющиеся цепочки обратных `` кавычек ``` заменяются на примитивы.";
+            var input = "РџРѕРІС‚РѕСЂСЏСЋС‰РёРµСЃСЏ С†РµРїРѕС‡РєРё РѕР±СЂР°С‚РЅС‹С… `` РєР°РІС‹С‡РµРє ``` Р·Р°РјРµРЅСЏСЋС‚СЃСЏ РЅР° РїСЂРёРјРёС‚РёРІС‹.";
 
             var result = ParagraphPreprocessor.ReplaceMultiBackticksToEntities(input);
 
-            Assert.AreEqual("Повторяющиеся цепочки обратных <BT><BT> кавычек <BT><BT><BT> заменяются на примитивы.", result);
+            Assert.AreEqual("РџРѕРІС‚РѕСЂСЏСЋС‰РёРµСЃСЏ С†РµРїРѕС‡РєРё РѕР±СЂР°С‚РЅС‹С… <BT><BT> РєР°РІС‹С‡РµРє <BT><BT><BT> Р·Р°РјРµРЅСЏСЋС‚СЃСЏ РЅР° РїСЂРёРјРёС‚РёРІС‹.", result);
         }
 
         [Test]
         public void ReplaceMultiUnderscoresToEntities_MultiUnderscores_ReplacesToEntities()
         {
-            var input = "Повторяющиеся __цепочки___ более _двух __ подчерков ___заменяются ____на примитивы.";
+            var input = "РџРѕРІС‚РѕСЂСЏСЋС‰РёРµСЃСЏ __С†РµРїРѕС‡РєРё___ Р±РѕР»РµРµ _РґРІСѓС… __ РїРѕРґС‡РµСЂРєРѕРІ ___Р·Р°РјРµРЅСЏСЋС‚СЃСЏ ____РЅР° РїСЂРёРјРёС‚РёРІС‹.";
 
             var result = ParagraphPreprocessor.ReplaceMultiUnderscoresToEntities(input);
 
-            Assert.AreEqual("Повторяющиеся __цепочки<US><US><US> более _двух __ подчерков <US><US><US>заменяются <US><US><US><US>на примитивы.", result);
+            Assert.AreEqual("РџРѕРІС‚РѕСЂСЏСЋС‰РёРµСЃСЏ __С†РµРїРѕС‡РєРё<US><US><US> Р±РѕР»РµРµ _РґРІСѓС… __ РїРѕРґС‡РµСЂРєРѕРІ <US><US><US>Р·Р°РјРµРЅСЏСЋС‚СЃСЏ <US><US><US><US>РЅР° РїСЂРёРјРёС‚РёРІС‹.", result);
         }
     }
 }

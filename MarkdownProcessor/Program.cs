@@ -1,19 +1,38 @@
-﻿namespace MarkdownProcessor
+﻿using System;
+using System.IO;
+using System.Reflection;
+
+namespace MarkdownProcessor
 {
     public class Program
     {
         static void Main(string[] args)
         {
-            IParameterManager parameterManager=new ConsoleParameterManager();
-            var filename = parameterManager.GetFirstParameter(args);
+            var filename = GetFirstParameter(args);
 
-            IFileManager fileManager = new FileManager();
-            var fileContent = fileManager.ReadFile(filename);
+            var fileContent = File.ReadAllText(filename);
 
             var result = Parser.MarkdownParser.Parse(fileContent);
 
-            fileManager.WriteFile("result.html", result);
-        }   
+            File.WriteAllText(FormResultFilename("result.html"), result);
+        }
+
+        private static string GetFirstParameter(string[] consoleArguments)
+        {
+            if (consoleArguments.Length != 0) return consoleArguments[0];
+            throw new Exception("File name must be provided");
+        }
+
+        private static string FormResultFilename(string filename)
+        {
+            var programDirecory = GetExecutingAssemblyDirectory();
+            return Path.Combine(programDirecory, filename);
+        }
+
+        private static string GetExecutingAssemblyDirectory()
+        {
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        }
 
     }
 }
