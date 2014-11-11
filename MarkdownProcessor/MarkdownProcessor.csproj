@@ -47,16 +47,16 @@
   <ItemGroup>
     <Compile Include="CodeNode.cs" />
     <Compile Include="EmNode.cs" />
-    <Compile Include="MarkdownParserTests\MarkdownParserTestsOther.cs" />
+    <Compile Include="MarkdownProcessorTests\MarkdownParserTestsOther.cs" />
     <Compile Include="Node.cs" />
-    <Compile Include="MarkdownParserTests\ParagraphsExtractorTests.cs" />
-    <Compile Include="MarkdownParserTests\MarkdownParserTestsForEm.cs" />
-    <Compile Include="MarkdownParserTests\MarkdownParserTestsForCode.cs" />
-    <Compile Include="MarkdownParserTests\MarkdownParserTestsForP.cs" />
-    <Compile Include="MarkdownParserTests\MarkdownParserTestsForStrong.cs" />
+    <Compile Include="MarkdownProcessorTests\ParagraphsExtractorTests.cs" />
+    <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForEm.cs" />
+    <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForCode.cs" />
+    <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForP.cs" />
+    <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForStrong.cs" />
     <Compile Include="InternalRepresentationTextConverter.cs" />
     <Compile Include="ParagraphExtractor.cs" />
-    <Compile Include="MarkdownParserTests\InternalRepresentationTextConverterTests.cs" />
+    <Compile Include="MarkdownProcessorTests\InternalRepresentationTextConverterTests.cs" />
     <Compile Include="MarkdownParser.cs" />
     <Compile Include="ParagraphNode.cs" />
     <Compile Include="Program.cs" />
