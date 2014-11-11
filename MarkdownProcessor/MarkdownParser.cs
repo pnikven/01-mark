@@ -54,22 +54,24 @@ namespace MarkdownProcessor
         {
             while (remainingText != "")
             {
+                bool bMatch = false;
                 foreach (var pattern in _patternToNodeMap.Keys)
                 {
                     var match = Regex.Match(remainingText, (string) pattern);
                     if (!match.Success) continue;
 
+                    bMatch = true;
                     remainingText = remainingText.Substring(match.ToString().Length);
                     var consumedText = match.Groups[1].ToString();
-
                     var nodeType = (Type) _patternToNodeMap[pattern];
                     var newNode = CreateNodeFromConsumedText(nodeType, consumedText);
                     node.AddChild(newNode);
                     if (newNode.CanContainOtherTags()) BuildNode((TagNode)newNode, consumedText);
-                    if (remainingText == "") return;
+                    break;
                 }
 
-                remainingText = AddSequenceOfFirstEqualCharsAsChildTextNodeIfNoPatternMatchs(node, remainingText);
+                if(!bMatch)
+                    remainingText = AddSequenceOfFirstEqualCharsAsChildTextNodeIfNoPatternMatchs(node, remainingText);
             }
         }
 
