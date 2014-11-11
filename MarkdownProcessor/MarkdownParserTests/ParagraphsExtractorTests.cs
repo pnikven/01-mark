@@ -1,5 +1,4 @@
 ﻿using System;
-using MarkdownProcessor.Parser;
 using NUnit.Framework;
 
 namespace MarkdownProcessor.MarkdownParserTests

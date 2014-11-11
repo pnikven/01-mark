@@ -2,30 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MarkdownProcessor.Parser
+namespace MarkdownProcessor
 {
-    public enum NodeType
-    {
-        P,
-        Code,
-        Em,
-        Strong,
-        Text
-    }
-
     public class TagMapper
     {
-        private const string UnderscoreReplacement = "<US>";
-        private const string BacktickReplacement = "<BT>";
-
-        public static readonly Dictionary<string, string> ReplacementForMark =
-            new Dictionary<string, string>()
-            {
-                    {"_", UnderscoreReplacement},
-                    {"`", BacktickReplacement}
-            };
-
-        public static string AllMarkers = string.Join("", ReplacementForMark.Keys.ToArray());
+        private const string AllMarkers = "`_";
 
         public static string GetMarkdownCapturePattern(NodeType nodeType)
         {

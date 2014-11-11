@@ -1,4 +1,3 @@
-using MarkdownProcessor.Parser;
 using NUnit.Framework;
 
 namespace MarkdownProcessor.MarkdownParserTests
@@ -8,7 +7,8 @@ namespace MarkdownProcessor.MarkdownParserTests
     {
         void ParseCheck(string input, string expected)
         {
-            var result = MarkdownParser.Parse(input);
+            var markdownParser = new MarkdownParser();
+            var result = markdownParser.Parse(input);
             Assert.AreEqual(expected, result);
         }
 

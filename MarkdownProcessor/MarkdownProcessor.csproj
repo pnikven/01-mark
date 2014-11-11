@@ -37,6 +37,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,18 +46,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MarkdownParserTests\MarkdownParserTestsOther.cs" />
-    <Compile Include="Parser\NodeInfo.cs" />
-    <Compile Include="Parser\ParagraphNode.cs" />
+    <Compile Include="NodeType.cs" />
+    <Compile Include="NodeOriginal.cs" />
     <Compile Include="MarkdownParserTests\ParagraphsExtractorTests.cs" />
     <Compile Include="MarkdownParserTests\MarkdownParserTestsForEm.cs" />
     <Compile Include="MarkdownParserTests\MarkdownParserTestsForCode.cs" />
     <Compile Include="MarkdownParserTests\MarkdownParserTestsForP.cs" />
     <Compile Include="MarkdownParserTests\MarkdownParserTestsForStrong.cs" />
-    <Compile Include="Parser\ParagraphPreprocessor.cs" />
-    <Compile Include="Parser\ParagraphExtractor.cs" />
-    <Compile Include="MarkdownParserTests\ParagraphPreprocessorTests.cs" />
-    <Compile Include="Parser\MarkdownParser.cs" />
-    <Compile Include="Parser\TagMapper.cs" />
+    <Compile Include="InternalRepresentationTextConverter.cs" />
+    <Compile Include="ParagraphExtractor.cs" />
+    <Compile Include="MarkdownParserTests\InternalRepresentationTextConverterTests.cs" />
+    <Compile Include="MarkdownParser.cs" />
+    <Compile Include="TagMapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

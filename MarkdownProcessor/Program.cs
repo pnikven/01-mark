@@ -12,7 +12,8 @@ namespace MarkdownProcessor
 
             var fileContent = File.ReadAllText(filename);
 
-            var result = Parser.MarkdownParser.Parse(fileContent);
+            var markdownParser = new MarkdownParser();
+            var result = markdownParser.Parse(fileContent);
 
             File.WriteAllText(FormResultFilename("result.html"), result);
         }
