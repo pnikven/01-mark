@@ -9,35 +9,26 @@ namespace MarkdownProcessor
 {
     class MarkdownParser
     {
-        const BindingFlags BindFlags = BindingFlags.DeclaredOnly |
-                                          BindingFlags.NonPublic |
-                                          BindingFlags.Instance; 
-
-        private readonly Hashtable _patternToNodeTypeMap;
+        private readonly Hashtable _patternToNodeMap;
 
         public MarkdownParser()
         {
-            _patternToNodeTypeMap=CreatePatternToNodeHashmap();
+            _patternToNodeMap=CreatePatternToNodeMap();
         }
 
-        public string Parse(string filecontent)
+        public string Parse(string content)
         {
-            if (string.IsNullOrEmpty(filecontent)) return "";
+            if (string.IsNullOrEmpty(content)) return "";
 
-            filecontent = NormalizeLineEndings(filecontent);
-
-            filecontent = HttpUtility.HtmlEncode(filecontent);
+            content = NormalizeLineEndings(content);
+            content = HttpUtility.HtmlEncode(content);
 
             var textConverter=new InternalRepresentationTextConverter();
 
-            filecontent = textConverter.Encode(filecontent);
-
-            var paragraphs = ParagraphExtractor.ExtractParagraphs(filecontent);
-
-            var parsedParagraphs = paragraphs.Select(ParseParagraph);
-
-            var parsedContent = string.Join("\n", parsedParagraphs);
-
+            content = textConverter.Encode(content);
+            var parsedContent = ParagraphExtractor.ExtractParagraphs(content)
+                .Select(ParseParagraph)
+                .Aggregate((p1,p2)=>p1+p2);
             var result = textConverter.Decode(parsedContent);
 
             return result;
@@ -63,7 +54,7 @@ namespace MarkdownProcessor
         {
             while (remainingText != "")
             {
-                foreach (var pattern in _patternToNodeTypeMap.Keys)
+                foreach (var pattern in _patternToNodeMap.Keys)
                 {
                     var match = Regex.Match(remainingText, (string) pattern);
                     if (!match.Success) continue;
@@ -71,65 +62,56 @@ namespace MarkdownProcessor
                     remainingText = remainingText.Substring(match.ToString().Length);
                     var consumedText = match.Groups[1].ToString();
 
-                    var nodeType = (Type) _patternToNodeTypeMap[pattern];
-                    if (nodeType == typeof(TextNode))
-                    {
-                        var textNode = (TextNode)nodeType.GetMethod("Create")
-                            .Invoke(null, new object[] { consumedText });
-                        node.AddChild(textNode);
-                    }
-                    else if (nodeType == typeof(CodeNode))
-                    {
-                        var codeNode = (CodeNode)nodeType.GetMethod("Create")
-                            .Invoke(null, new object[] { consumedText });
-                        node.AddChild(codeNode);
-                    }
-                    else
-                    {
-                        var tagNode = nodeType.GetConstructor(Type.EmptyTypes).Invoke(null);
-                        node.AddChild((Node)tagNode);
-                        BuildNode((TagNode)tagNode, consumedText);
-                    }
+                    var nodeType = (Type) _patternToNodeMap[pattern];
+                    var newNode = CreateNodeFromConsumedText(nodeType, consumedText);
+                    node.AddChild(newNode);
+                    if (newNode.CanContainOtherTags()) BuildNode((TagNode)newNode, consumedText);
                     if (remainingText == "") return;
                 }
-                if (remainingText == "") return;
-                char currentMarker = remainingText[0];
-                var i = 1;
-                while (i < remainingText.Length && remainingText[i] == currentMarker) i++;
-                node.AddChild(TextNode.Create(new string(currentMarker, i)));
-                remainingText = remainingText.Substring(i);
+
+                remainingText = AddSequenceOfFirstEqualCharsAsChildTextNodeIfNoPatternMatchs(node, remainingText);
             }
         }
 
-        private Hashtable CreatePatternToNodeHashmap()
+        private static string AddSequenceOfFirstEqualCharsAsChildTextNodeIfNoPatternMatchs(TagNode node, string remainingText)
         {
-            var patternToNodeTypeMap = new Hashtable();
-            Assembly executingAssembly = Assembly.GetExecutingAssembly();
-            Type[] types = executingAssembly.GetTypes()
-                .Where(type => type.IsSubclassOf(typeof (Node))).ToArray();
-            foreach (var type in types)
+            char firstChar = remainingText[0];
+            var sequenceOfFirstEqualChars = Regex.Match(remainingText, "^" + firstChar + "+").ToString();
+            node.AddChild(new TextNode(sequenceOfFirstEqualChars));
+            remainingText = remainingText.Substring(sequenceOfFirstEqualChars.Length);
+            return remainingText;
+        }
+
+        private static Node CreateNodeFromConsumedText(Type nodeType, string consumedText)
+        {
+            var constructorWithStringParameter = nodeType.GetConstructor(new[] {typeof (String)});
+            if (constructorWithStringParameter != null)
             {
-                var methodNames = type.GetMethods(BindFlags)
-                    .Select(method => method.Name).ToArray();
-                if (methodNames.Contains("GetPatternFromTheBeginningOfString"))
+                return (Node) constructorWithStringParameter.Invoke(new object[] {consumedText});
+            }
+
+            var defaultConstructor = nodeType.GetConstructor(Type.EmptyTypes);
+            if (defaultConstructor != null) return (Node) defaultConstructor.Invoke(null);
+
+            throw new Exception("Default constructor for " + nodeType.Name + " is not available");
+        }
+
+        private Hashtable CreatePatternToNodeMap()
+        {
+            var patternToNodeMap = new Hashtable();
+            Assembly executingAssembly = Assembly.GetExecutingAssembly();
+            Type[] nodeTypes = executingAssembly.GetTypes()
+                .Where(type => type.IsSubclassOf(typeof (Node))).ToArray();
+            foreach (var type in nodeTypes)
+            {
+                var method = type.GetMethod("GetPatternThatStartsFromTheBeginningOfString");
+                if (method != null)
                 {
-                    var nodeInstance = CreateInstance(type);
-                    var method = type.GetMethod("GetPatternFromTheBeginningOfString",
-                            BindFlags);
-                    var pattern = (string)method.Invoke(nodeInstance, null);
-                    if (pattern != Node.PatternNotSupported)
-                        patternToNodeTypeMap.Add(pattern, type);
+                    var pattern = (string)method.Invoke(null, null);
+                    patternToNodeMap.Add(pattern, type);                    
                 }
             }
-            return patternToNodeTypeMap;
-        }
-
-        private static object CreateInstance(Type type)
-        {
-            var executingAssembly = Assembly.GetExecutingAssembly();
-            var instance = Assembly.GetExecutingAssembly().CreateInstance(
-                executingAssembly.GetName().Name + "." + type.Name);
-            return instance;
+            return patternToNodeMap;
         }
     }
 }
