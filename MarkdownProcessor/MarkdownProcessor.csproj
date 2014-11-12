@@ -45,23 +45,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeNode.cs" />
-    <Compile Include="EmNode.cs" />
     <Compile Include="MarkdownProcessorTests\MarkdownParserTestsOther.cs" />
-    <Compile Include="Node.cs" />
+    <Compile Include="INode.cs" />
     <Compile Include="MarkdownProcessorTests\ParagraphsExtractorTests.cs" />
     <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForEm.cs" />
     <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForCode.cs" />
     <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForP.cs" />
     <Compile Include="MarkdownProcessorTests\MarkdownParserTestsForStrong.cs" />
     <Compile Include="InternalRepresentationTextConverter.cs" />
+    <Compile Include="NodeType.cs" />
     <Compile Include="ParagraphExtractor.cs" />
     <Compile Include="MarkdownProcessorTests\InternalRepresentationTextConverterTests.cs" />
     <Compile Include="MarkdownParser.cs" />
-    <Compile Include="ParagraphNode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StrongNode.cs" />
     <Compile Include="TagNode.cs" />
     <Compile Include="TextNode.cs" />
   </ItemGroup>

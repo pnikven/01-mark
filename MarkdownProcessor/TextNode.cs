@@ -1,6 +1,6 @@
 namespace MarkdownProcessor
 {
-    class TextNode : Node
+    class TextNode : INode
     {
         string InnerText { get; set; }
 
@@ -9,19 +9,9 @@ namespace MarkdownProcessor
             InnerText = text;
         }
 
-        public override string ToString()
+        public string GetHtml()
         {
             return InnerText;
-        }
-
-        public override bool CanContainOtherTags()
-        {
-            return false;
-        }
-
-        public static string GetPatternThatStartsFromTheBeginningOfString()
-        {
-            return "^([^`_]+)";
         }
     }
 }

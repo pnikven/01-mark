@@ -3,25 +3,35 @@ using System.Linq;
 
 namespace MarkdownProcessor
 {
-    abstract class TagNode : Node
+    class TagNode : INode
     {
-        protected List<Node> Children = new List<Node>();
+        private string TagName { get; set; }
 
-        public void AddChild(Node child)
+        protected List<INode> Children = new List<INode>();
+
+        public TagNode(string tagName)
+        {
+            TagName = tagName;
+        }
+
+        public void AddChild(INode child)
         {
             Children.Add(child);
         }
 
-        public override string ToString()
+        public string GetHtml()
         {
-            return WrapByTag(string.Join("", Children.Select(child => child.ToString())));
+            return WrapByTag(string.Join("", Children.Select(child => child.GetHtml())));
         }
 
-        protected virtual string WrapByTag(string content)
+        private string WrapByTag(string content)
         {
             return string.Format("<{0}>{1}</{0}>", GetTagName(), content);
         }
 
-        protected abstract string GetTagName();
+        string GetTagName()
+        {
+            return TagName;
+        }
     }
 }

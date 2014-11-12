@@ -6,17 +6,14 @@ namespace MarkdownProcessor
 {
     class InternalRepresentationTextConverter
     {
-        private const string UnderscoreReplacement = "<US>";
-        private const string BacktickReplacement = "<BT>";
-
         private readonly Dictionary<string, string> _replacementForMark;
 
         public InternalRepresentationTextConverter()
         {
             _replacementForMark = new Dictionary<string, string>()
             {
-                {"_", UnderscoreReplacement},
-                {"`", BacktickReplacement}
+                {"_", "<US>"},
+                {"`", "<BT>"}
             };
         }
 
@@ -26,46 +23,31 @@ namespace MarkdownProcessor
 
             p = ReplaceUnderscoresInTextAndDigitsToEntities(p);
 
-            p = ReplaceMultiBackticksToEntities(p);
-
-            p = ReplaceMultiUnderscoresToEntities(p);
+            p = ReplaceMarksInPatternToEntities(p, "``+", "`");
+            p = ReplaceMarksInPatternToEntities(p, "___+", "_");
 
             return p;
         }
 
-        string ReplaceEscapedMarksToEntities(string text)
+        private string ReplaceEscapedMarksToEntities(string text)
         {
             return _replacementForMark
-                    .Keys
-                    .Aggregate(text, (currentParagraph, escapedMark) =>
-                        currentParagraph.Replace(@"\" + escapedMark, @"\" + _replacementForMark[escapedMark]));
+                    .Aggregate(text, (currentText, replacement) =>
+                        currentText.Replace(@"\" + replacement.Key, @"\" + replacement.Value));
         }
 
-        string ReplaceUnderscoresInTextAndDigitsToEntities(string text)
+        private string ReplaceUnderscoresInTextAndDigitsToEntities(string text)
         {
             return ReplaceMarksInPatternToEntities(text,
                 string.Format(@"[{0}]+_+[{0}]+(_+[{0}]+)*", @"\p{L}\p{Nd}"),
                 "_");
         }
 
-        string ReplaceMultiBackticksToEntities(string text)
+        private string ReplaceMarksInPatternToEntities(string text, string pattern, string mark)
         {
-            return ReplaceMarksInPatternToEntities(text, "``+", "`");
-        }
-
-        string ReplaceMultiUnderscoresToEntities(string text)
-        {
-            return ReplaceMarksInPatternToEntities(text, "___+", "_");
-        }
-
-        string ReplaceMarksInPatternToEntities(string text, string pattern, string mark)
-        {
-            var matches =
-                from object match in Regex.Matches(text,pattern) select match.ToString();
-            return matches
-                .OrderByDescending(match=>match.Length)
-                .Aggregate(text, (currentParagraph, match) =>
-                    currentParagraph.Replace(match, match.Replace(mark, _replacementForMark[mark])));
+            return
+                Regex.Replace(text, pattern, match => 
+                    match.ToString().Replace(mark,_replacementForMark[mark]));
         }
 
         public string Decode(string text)
@@ -73,13 +55,11 @@ namespace MarkdownProcessor
             return ReplaceEntitiesToTextRepresentation(text);
         }
 
-        string ReplaceEntitiesToTextRepresentation(string encodedText)
+        private string ReplaceEntitiesToTextRepresentation(string encodedText)
         {
             return _replacementForMark
-                    .Values
-                    .Aggregate(encodedText, (currentParagraph, entity) =>
-                        currentParagraph.Replace(entity, 
-                            _replacementForMark.First(v=>v.Value==entity).Key));            
+                    .Aggregate(encodedText, (currentText, replacement) =>
+                        currentText.Replace(replacement.Value, replacement.Key));            
         }
 
     }

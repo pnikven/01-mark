@@ -34,7 +34,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         }
 
         [Test]
-        public void Encode_MultiBackticks_ReplacesToEntities()
+        public void Encode_ExtraBackticks_ReplacesToEntities()
         {
             var input = "Повторяющиеся цепочки обратных `` кавычек ``` заменяются на примитивы.";
 
@@ -44,7 +44,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         }
 
         [Test]
-        public void Encode_MultiUnderscores_ReplacesToEntities()
+        public void Encode_ExtraUnderscores_ReplacesToEntities()
         {
             var input = "Повторяющиеся __цепочки___ более _двух __ подчерков ___заменяются ____на примитивы.";
 
