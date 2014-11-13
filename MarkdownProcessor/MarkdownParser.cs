@@ -51,10 +51,12 @@ namespace MarkdownProcessor
         {
             while (remainingText != "")
             {
+                var bMatch = false;
                 foreach (var entry in _patternToNodeMap)
                 {
                     var match = Regex.Match(remainingText, entry.Key);
                     if (!match.Success) continue;
+                    bMatch = true;
                     remainingText = remainingText.Substring(match.ToString().Length);
                     var consumedText = match.Groups[1].ToString();
                     var nodeType = entry.Value;
@@ -65,6 +67,8 @@ namespace MarkdownProcessor
                     else newNode.AddChild(new TextNode(consumedText));
                     break;
                 }
+                if (!bMatch) throw new Exception(
+                    "Start of text [" + remainingText + "] was not recognized by any of the pattern");
             }
         }
 
