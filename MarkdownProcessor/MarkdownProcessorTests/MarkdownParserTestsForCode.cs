@@ -1,17 +1,10 @@
 using NUnit.Framework;
 
-namespace MarkdownProcessor.MarkdownParserTests
+namespace MarkdownProcessor.MarkdownProcessorTests
 {
     [TestFixture]
-    class MarkdownParserTestsForCode
+    class MarkdownParserTestsForCode : MarkdownParserTests
     {
-        void ParseCheck(string input, string expected)
-        {
-            var markdownParser = new MarkdownParser();
-            var result = markdownParser.Parse(input);
-            Assert.AreEqual(expected, result);
-        }
-
         [Test]
         public void Parse_TextBetweenBackticks_ToCode()
         {
@@ -38,8 +31,8 @@ namespace MarkdownProcessor.MarkdownParserTests
             "<p>Текст с <code>окруженный обратными кавычками с повторяющимися обратными ``` кавычками</code> внутри</p>")]
         public void Parse_NotSingleBackticks_Ignore(string input, string expected)
         {
-            ParseCheck(input,expected);
+            ParseCheck(input, expected);
         }
-        
+
     }
 }

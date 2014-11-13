@@ -46,21 +46,15 @@ namespace MarkdownProcessor
         private string ReplaceMarksInPatternToEntities(string text, string pattern, string mark)
         {
             return
-                Regex.Replace(text, pattern, match => 
-                    match.ToString().Replace(mark,_replacementForMark[mark]));
+                Regex.Replace(text, pattern, match =>
+                    match.ToString().Replace(mark, _replacementForMark[mark]));
         }
 
         public string Decode(string text)
         {
-            return ReplaceEntitiesToTextRepresentation(text);
-        }
-
-        private string ReplaceEntitiesToTextRepresentation(string encodedText)
-        {
             return _replacementForMark
-                    .Aggregate(encodedText, (currentText, replacement) =>
-                        currentText.Replace(replacement.Value, replacement.Key));            
+                .Aggregate(text, (currentText, replacement) =>
+                    currentText.Replace(replacement.Value, replacement.Key));
         }
-
     }
 }

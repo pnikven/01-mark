@@ -1,9 +1,9 @@
 ﻿using NUnit.Framework;
 
-namespace MarkdownProcessor.MarkdownParserTests
+namespace MarkdownProcessor.MarkdownProcessorTests
 {
     [TestFixture]
-    class MarkdownParserTestsOther
+    class MarkdownParserTestsOther : MarkdownParserTests
     {
         [TestCase("Строка с _пересекающимися__ _em и__ strong",
             "<p>Строка с <em>пересекающимися__ </em>em и__ strong</p>")]
@@ -15,10 +15,14 @@ namespace MarkdownProcessor.MarkdownParserTests
             "<p>Тест с <em>выделением</em><code>, после которого сразу идет</code> код</p>")]
         public void Parse_SampleText_ToCorrectHtml(string input, string expected)
         {
-            var markdownParser = new MarkdownParser();
-            var result = markdownParser.Parse(input);
+            ParseCheck(input, expected);
+        }
 
-            Assert.AreEqual(expected, result);
+        [Test]
+        public void Parse_AngleBrackets_EscapesToHtmlEntities()
+        {
+            ParseCheck("Sentence with <b>angle</b> brackets.",
+                "<p>Sentence with &lt;b&gt;angle&lt;/b&gt; brackets.</p>");
         }
 
         [Test]
@@ -28,18 +32,7 @@ namespace MarkdownProcessor.MarkdownParserTests
 
             var result = MarkdownParser.NormalizeLineEndings(input);
 
-            Assert.AreEqual("String1\nStrong2\nString3\nString4\n",result);
-        }
-
-        [Test]
-        public void EscapeAngleBrackets_AngleBrackets_EscapesToHtmlEntities()
-        {
-            var input = "Sentence with <b>angle</b> brackets.";
-
-            var markdownParser = new MarkdownParser();
-            var result = markdownParser.Parse(input);
-
-            Assert.AreEqual("<p>Sentence with &lt;b&gt;angle&lt;/b&gt; brackets.</p>", result);
+            Assert.AreEqual("String1\nStrong2\nString3\nString4\n", result);
         }
     }
 }

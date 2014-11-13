@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Collections;
 using NUnit.Framework;
 
-namespace MarkdownProcessor.MarkdownParserTests
+namespace MarkdownProcessor.MarkdownProcessorTests
 {
     class ParagraphsExtractorTests
     {
+        private void ExtractParagraphsCheck(string input, IEnumerable expected)
+        {
+            var result = ParagraphExtractor.ExtractParagraphs(input);
+            Assert.AreEqual(expected, result);
+        }
+
         [Test]
         public void ExtractParagraphs_OnNull_ThrowsException()
         {
@@ -17,21 +24,19 @@ namespace MarkdownProcessor.MarkdownParserTests
         [Test]
         public void ExtractParagraphs_OnEmpty_ReturnsEmptyCollection()
         {
-            var input = "";
-
-            var result = ParagraphExtractor.ExtractParagraphs(input);
-
-            Assert.AreEqual(new string[] {  }, result);
+            ExtractParagraphsCheck("", new string[] { });
         }
 
-        [Test]
-        public void ExtractParagraphs_OnOneSentence_ReturnsCollectionWithOneString()
+        [TestCase("One paragraph.",
+            new[] { "One paragraph." })]
+        [TestCase("p1\n\np2",
+            new[] { "p1", "p2" })]
+        [TestCase("p1\n \t \np2\n \tstill p2\n \np3",
+            new[] { "p1", "p2\n \tstill p2", "p3" })]
+        public void ExtractParagraphs_OnSomeParagraphs_ReturnsCollectionWithTheseParagraphs(string input, IEnumerable expected)
         {
-            var input = "One sentence.";
-
-            var result = ParagraphExtractor.ExtractParagraphs(input);
-
-            Assert.AreEqual(new[] { "One sentence." }, result);
+            ExtractParagraphsCheck(input, expected);
         }
+
     }
 }

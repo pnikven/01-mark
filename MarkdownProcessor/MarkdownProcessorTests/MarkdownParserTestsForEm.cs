@@ -1,17 +1,10 @@
 ﻿using NUnit.Framework;
 
-namespace MarkdownProcessor.MarkdownParserTests
+namespace MarkdownProcessor.MarkdownProcessorTests
 {
     [TestFixture]
-    class MarkdownParserTestsForEm
+    class MarkdownParserTestsForEm : MarkdownParserTests
     {
-        void ParseCheck(string input, string expected)
-        {
-            var markdownParser = new MarkdownParser();
-            var result = markdownParser.Parse(input);
-            Assert.AreEqual(expected, result);
-        }
-
         [TestCase("Текст _окруженный с двух сторон_  одинарными символами подчерка превращается в тег em",
             "<p>Текст <em>окруженный с двух сторон</em>  одинарными символами подчерка превращается в тег em</p>")]
         [TestCase("Текст _окруженный \nсимволами_ подчеркивания в нескольких строках превращается в тег em",
@@ -41,7 +34,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         [Test]
         public void Parse_EscapedUnderscores_Ignore()
         {
-            ParseCheck(@"Экранирование: \_Вот это\_, не должно выделиться тегом em", 
+            ParseCheck(@"Экранирование: \_Вот это\_, не должно выделиться тегом em",
                 @"<p>Экранирование: \_Вот это\_, не должно выделиться тегом em</p>");
         }
 

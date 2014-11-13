@@ -1,17 +1,10 @@
 ﻿using NUnit.Framework;
 
-namespace MarkdownProcessor.MarkdownParserTests
+namespace MarkdownProcessor.MarkdownProcessorTests
 {
     [TestFixture]
-    class MarkdownParserTestsForStrong
+    class MarkdownParserTestsForStrong : MarkdownParserTests
     {
-        void ParseCheck(string input, string expected)
-        {
-            var markdownParser = new MarkdownParser();
-            var result = markdownParser.Parse(input);
-            Assert.AreEqual(expected, result);
-        }
-
         [TestCase("Текст с __двумя символами__ — д.б. жирным",
             "<p>Текст с <strong>двумя символами</strong> — д.б. жирным</p>")]
         [TestCase("Текст __окруженный \nсимволами__ двойного подчеркивания в нескольких строках д.б. жирным",
@@ -54,7 +47,7 @@ namespace MarkdownProcessor.MarkdownParserTests
         [Test]
         public void Parse_UnderscoresInTextAndDigits_Ignore()
         {
-            ParseCheck("Подчерки_внутри_текста__и__цифр_12_3 не считаются выделением", 
+            ParseCheck("Подчерки_внутри_текста__и__цифр_12_3 не считаются выделением",
                 "<p>Подчерки_внутри_текста__и__цифр_12_3 не считаются выделением</p>");
         }
     }

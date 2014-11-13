@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -11,7 +12,7 @@ namespace MarkdownProcessor
 
         public MarkdownParser()
         {
-            _patternToNodeMap=CreatePatternToNodeMap();
+            _patternToNodeMap = CreatePatternToNodeMap();
         }
 
         public string Parse(string content)
@@ -21,12 +22,12 @@ namespace MarkdownProcessor
             content = NormalizeLineEndings(content);
             content = HttpUtility.HtmlEncode(content);
 
-            var textConverter=new InternalRepresentationTextConverter();
+            var textConverter = new InternalRepresentationTextConverter();
 
             content = textConverter.Encode(content);
             var parsedContent = ParagraphExtractor.ExtractParagraphs(content)
                 .Select(ParseParagraph)
-                .Aggregate((p1,p2)=>p1+p2);
+                .Aggregate((p1, p2) => p1 + p2);
             var result = textConverter.Decode(parsedContent);
 
             return result;
@@ -42,9 +43,7 @@ namespace MarkdownProcessor
         public string ParseParagraph(string text)
         {
             var paragraph = new TagNode("p");
-
             BuildNode(paragraph, text);
-
             return paragraph.GetHtml();
         }
 
@@ -56,25 +55,17 @@ namespace MarkdownProcessor
                 {
                     var match = Regex.Match(remainingText, entry.Key);
                     if (!match.Success) continue;
-
                     remainingText = remainingText.Substring(match.ToString().Length);
                     var consumedText = match.Groups[1].ToString();
                     var nodeType = entry.Value;
-                    var newNode = CreateNodeFromConsumedText(nodeType, consumedText);
+                    if (nodeType.Name == "text") { node.AddChild(new TextNode(consumedText)); break; }
+                    var newNode = new TagNode(nodeType.Name);
                     node.AddChild(newNode);
-                    if (nodeType.CanContainOtherTags) BuildNode((TagNode) newNode, consumedText);
+                    if (nodeType.CanContainOtherTags) BuildNode(newNode, consumedText);
+                    else newNode.AddChild(new TextNode(consumedText));
                     break;
                 }
             }
-        }
-
-        private static INode CreateNodeFromConsumedText(NodeType nodeType, string consumedText)
-        {
-            if(nodeType.Name=="text")return new TextNode(consumedText);
-            if (nodeType.Name != "code") return new TagNode(nodeType.Name);
-            var codeNode = new TagNode("code");
-            codeNode.AddChild(new TextNode(consumedText));
-            return codeNode;
         }
 
         private Dictionary<string, NodeType> CreatePatternToNodeMap()

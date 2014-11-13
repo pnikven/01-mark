@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MarkdownProcessorTests\MarkdownParserTests.cs" />
     <Compile Include="MarkdownProcessorTests\MarkdownParserTestsOther.cs" />
     <Compile Include="INode.cs" />
     <Compile Include="MarkdownProcessorTests\ParagraphsExtractorTests.cs" />

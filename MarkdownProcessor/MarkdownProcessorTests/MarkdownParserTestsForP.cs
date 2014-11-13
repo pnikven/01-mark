@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 
-namespace MarkdownProcessor.MarkdownParserTests
+namespace MarkdownProcessor.MarkdownProcessorTests
 {
-    class MarkdownParserTestsForP
+    class MarkdownParserTestsForP : MarkdownParserTests
     {
         [TestCase("Предложение из одной строки.",
             "<p>Предложение из одной строки.</p>")]
@@ -10,10 +10,7 @@ namespace MarkdownProcessor.MarkdownParserTests
             "<p>Предложение из нескольких строк.\nВторая строка\nТретья строка...</p>")]
         public void Parse_AnyString_ToP(string input, string expected)
         {
-            var markdownParser = new MarkdownParser();
-            var result = markdownParser.Parse(input);
-
-            Assert.AreEqual(expected, result);
+            ParseCheck(input, expected);
         }
     }
 }
